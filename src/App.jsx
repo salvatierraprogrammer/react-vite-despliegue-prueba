@@ -47,7 +47,7 @@ const theme = createTheme({
 function App() {
   return (
     <div className="App">
-      <Router basename={process.env.NODE_ENV === 'production' ? '/acompaniante-terapeutico' : ''}>
+      <Router >
       
         <ThemeProvider theme={theme}>
           <Header />
