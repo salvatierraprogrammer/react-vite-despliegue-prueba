@@ -1,10 +1,9 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client'; // Nota el cambio en la importación
-import App from './App';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Importa los estilos de Bootstrap
+import ReactDOM from 'react-dom/client';
+import App from './App'; // Verifica la ruta y existencia de App.js
+import 'bootstrap/dist/css/bootstrap.min.css'; // Asegúrate de que Bootstrap esté instalado
 
-// Crea un root para React y lo vincula al elemento con id 'root' en el HTML
-const root = ReactDOM.createRoot(document.getElementById('root')); // Usa createRoot
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
