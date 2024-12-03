@@ -1,0 +1,18 @@
+.patient-photo {
+    width: 100px; /* Tamaño de la imagen */
+    height: 100px; /* Tamaño de la imagen */
+    object-fit: cover; /* Asegura que la imagen se recorte en lugar de estirarse */
+  }
+  
+  .card-body {
+    text-align: left; /* Alinea el texto a la izquierda */
+    background:'#F3F3F3';
+    background-color: '#F3F3F3';
+  }
+  
+  .card-text i {
+    color: #007bff; /* Color del ícono (ajusta según tu preferencia) */
+  }
+  .h1{
+    color: azure;
+  }

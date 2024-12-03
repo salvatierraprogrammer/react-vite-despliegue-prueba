@@ -1,0 +1,62 @@
+/* App.css */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure the container takes up the full window height */
+}
+
+.main-content {
+  flex: 1; /* Expands main content to fill available space */
+}
+
+/* Footer Styles */
+footer {
+  background: #F3F3F3; /* Corrected background color */
+  padding: 20px 0;
+  border-top: 1px solid #e9ecef;
+  color: #504683; /* Corrected color */
+  margin-top: auto; /* Pushes footer down when necessary */
+}
+
+.footer h5 {
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.footer p {
+  margin: 0;
+}
+
+.social-icons {
+  margin-top: 10px;
+}
+
+.social-icons a {
+  color: #504683; /* Corrected color for social icons */
+  margin: 0 10px;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.social-icons a:hover {
+  color: #007bff;
+}
+
+.text-center {
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .footer h5 {
+    font-size: 16px;
+  }
+
+  .social-icons a {
+    font-size: 18px;
+  }
+}

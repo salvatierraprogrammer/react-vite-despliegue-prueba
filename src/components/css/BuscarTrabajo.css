@@ -1,0 +1,14 @@
+.btn {
+    display: flex;
+    align-items: center;
+  }
+  
+  .btn .fa-icon {
+    margin-right: 8px; /* Adjust space between icon and text */
+  }
+  
+  @media (max-width: 768px) {
+    .btn {
+      font-size: 14px; /* Adjust button text size on smaller screens */
+    }
+  }

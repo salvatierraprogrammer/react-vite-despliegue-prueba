@@ -1,0 +1,18 @@
+/* CSS para asegurar el posicionamiento adecuado del modal */
+.modal-dialog {
+    max-width: 500px;
+    margin-top: 20px;
+  }
+  
+  .modal-body {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .modal-backdrop {
+    z-index: 1050;
+  }
+  
+  .modal {
+    z-index: 1051;
+  }

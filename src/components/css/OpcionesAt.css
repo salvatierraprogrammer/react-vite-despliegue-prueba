@@ -1,0 +1,69 @@
+/* Estilos generales para los botones de opciones */
+.btn-opciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80px; /* Tamaño ajustado para navbar */
+  height: 80px; /* Tamaño ajustado para navbar */
+  border-radius: 50%;
+  background-color: #007bff; /* Azul predeterminado */
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para profundidad */
+}
+
+.btn-opciones:hover {
+  background-color: #0056b3; /* Azul más oscuro al pasar el mouse */
+  transform: scale(1.05); /* Aumento sutil al pasar el mouse */
+}
+
+.btn-opciones i {
+  font-size: 20px; /* Tamaño de icono ajustado */
+  margin-bottom: 4px; /* Espacio reducido entre icono y texto */
+}
+
+.btn-text {
+  font-size: 12px; /* Tamaño de texto ajustado */
+  margin-top: 4px; /* Espacio reducido entre texto y borde */
+  color: white;
+}
+
+/* Estilos específicos para botones peligrosos */
+.btn-danger {
+  background-color: #dc3545; /* Rojo predeterminado */
+}
+
+.btn-danger:hover {
+  background-color: #c82333; /* Rojo más oscuro al pasar el mouse */
+}
+
+.btn-danger .btn-text {
+  font-size: 12px; /* Tamaño de texto ajustado */
+  margin-top: 4px; /* Espacio reducido entre texto y borde */
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 767px) {
+  .btn-opciones {
+    width: 60px; /* Tamaño aún más pequeño en móviles */
+    height: 60px; /* Tamaño aún más pequeño en móviles */
+  }
+
+  .btn-opciones i {
+    font-size: 18px; /* Tamaño de icono reducido en móviles */
+  }
+
+  .btn-text {
+    font-size: 10px; /* Tamaño de texto reducido en móviles */
+  }
+}
+
+/* Estilos para pantallas grandes */
+@media (min-width: 768px) {
+  .container {
+    max-width: 960px; /* Limita el ancho en pantallas grandes */
+  }
+}

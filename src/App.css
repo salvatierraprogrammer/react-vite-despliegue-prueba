@@ -1,0 +1,73 @@
+/* App.css */
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #F3F3F3; /* Color de fondo para toda la página */
+  border-top: 1px solid #e9ecef;
+  color: #504683; /* Color del texto */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Asegúrate de que el contenedor principal ocupe toda la altura de la página */
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Garantiza que el contenedor se estire para llenar la pantalla */
+  background-color: #f4f4f4; /* Color de fondo principal */
+}
+
+/* Asegura que el contenido principal ocupe el espacio restante */
+.main-content {
+  flex: 1;
+  background-color: #f4f4f4; /* Color de fondo del contenido principal */
+}
+
+/* Estilos del pie de página */
+footer {
+  background-color: #F3F3F3; /* Color de fondo del pie de página */
+  padding: 20px 0;
+  border-top: 1px solid #e9ecef;
+  color: #504683; /* Color de texto del pie de página */
+  margin-top: auto; /* Asegura que el pie de página se quede al final si es necesario */
+}
+
+.footer h5 {
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.footer p {
+  margin: 0;
+}
+
+.social-icons {
+  margin-top: 10px;
+}
+
+.social-icons a {
+  color: #504683; /* Color de los íconos sociales */
+  margin: 0 10px;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.social-icons a:hover {
+  color: #007bff; /* Color cuando se pasa el cursor */
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Media Queries para pantallas más pequeñas */
+@media (max-width: 768px) {
+  .footer h5 {
+    font-size: 16px;
+  }
+
+  .social-icons a {
+    font-size: 18px;
+  }
+}

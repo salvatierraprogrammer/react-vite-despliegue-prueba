@@ -1,0 +1,60 @@
+/* Botón circular */
+.btn-circle {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    font-size: 24px;
+    text-align: center;
+    line-height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none; /* Quitar borde por defecto */
+    outline: none; /* Quitar contorno por defecto */
+    cursor: pointer; /* Cambiar el cursor al pasar sobre el botón */
+    transition: background-color 0.3s, box-shadow 0.3s; /* Transición suave para efectos */
+  }
+  
+  /* Estilo para los íconos dentro del botón */
+  .btn-circle i {
+    margin: 0;
+    color: #fff; /* Color del ícono, puedes ajustarlo según tus necesidades */
+  }
+  
+  /* Estilos para los botones con diferentes colores */
+  .btn-circle-primary {
+    background-color: #007bff; /* Color de fondo para el botón primario */
+  }
+  
+  .btn-circle-secondary {
+    background-color: #6c757d; /* Color de fondo para el botón secundario */
+  }
+  
+  .btn-circle-danger {
+    background-color: #dc3545; /* Color de fondo para el botón de peligro */
+  }
+  
+  /* Efectos hover para los botones */
+  .btn-circle-primary:hover {
+    background-color: #0056b3; /* Color de fondo en hover para el botón primario */
+  }
+  
+  .btn-circle-secondary:hover {
+    background-color: #5a6268; /* Color de fondo en hover para el botón secundario */
+  }
+  
+  .btn-circle-danger:hover {
+    background-color: #c82333; /* Color de fondo en hover para el botón de peligro */
+  }
+  
+  /* Efectos focus (cuando el botón es seleccionado) */
+  .btn-circle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra de enfoque para el botón */
+  }
+  
+  /* Efectos para el estado activo (cuando el botón es presionado) */
+  .btn-circle:active {
+    background-color: #004085; /* Color de fondo en estado activo para el botón primario */
+    box-shadow: none; /* Eliminar sombra de botón en estado activo */
+  }

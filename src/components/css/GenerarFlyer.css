@@ -1,0 +1,107 @@
+.imagen {
+    border-radius: 50%; /* Sin comillas */
+    width: 100px; 
+    height: 100px; /* Sin comillas */
+    object-fit: cover; /* Sin comillas */
+    margin-bottom: 20px; /* Sin comillas */
+    border: 2px solid #c2bfbf; /* Color del borde destacado */
+}
+.body {
+    background-color: #4e23a3; /* Un color de fondo similar al diseño */
+}
+.ulContenido{}
+
+.flyer {
+    background-color: #4e23a3; /* Fondo sólido similar */
+    background-image: linear-gradient(90deg, rgba(64,17,107,1) 0%, rgba(107,167,71,1) 9%, rgba(106,28,207,1) 100%);
+    border-radius: 10px;
+    padding: 20px;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    display: inline-block;
+    width: 100%;
+    max-width: 750px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+.button-list {
+   
+    margin-left: 10px; /* Elimina el margen izquierdo para centrarse */
+  }
+/* CSS */
+@media (max-width: 780px) {
+    .section-content {
+      flex-direction: column; /* Cambia la dirección del flex a columna */
+    }
+  
+    .button-list {
+      margin-top: 20px; /* Añade un margen superior para separar el aside del contenido anterior */
+      width: 100%; /* Asegúrate de que el aside ocupe todo el ancho disponible */
+      margin-left: 0; /* Elimina el margen izquierdo para centrarse */
+    }
+   
+  
+    
+    .flyer {
+        padding: 15px; /* Reducir el padding en pantallas pequeñas */
+        font-size: 14px; /* Reducir el tamaño de la fuente */
+      }
+    
+      .flyer h2 {
+        font-size: 20px; /* Reducir el tamaño del título */
+      }
+    
+      .flyer p {
+        font-size: 16px; /* Reducir el tamaño del texto */
+      }
+    
+      .flyer img {
+        margin-top: 10px; /* Reducir el margen superior de la imagen */
+      }
+      
+      .flyer ul {
+        max-width: 100%; /* Asegurarse de que la lista ocupe el ancho completo */
+      }
+    
+      .social-icons a {
+        font-size: 1.5em; /* Reducir el tamaño de los iconos sociales */
+      }
+      @media (max-width: 420px) {
+        .flyer {
+          padding: 10px; /* Reducir el padding en pantallas muy pequeñas */
+          font-size: 12px; /* Reducir el tamaño de la fuente */
+        }
+        .ulContenido{
+            max-width: '86%';
+        }
+        .flyer h2 {
+          font-size: 18px; /* Reducir el tamaño del título */
+        }
+      
+        .flyer p {
+          font-size: 14px; /* Reducir el tamaño del texto */
+        }
+      
+        .flyer img {
+          margin-top: 5px; /* Reducir el margen superior de la imagen */
+        }
+        
+        .flyer ul {
+          max-width: 100%;
+          padding-left: 0; /* Eliminar el padding izquierdo en pantallas pequeñas */
+        }
+      
+        .flyer li {
+          margin-bottom: 5px; /* Reducir el margen inferior de los elementos de lista */
+        }
+      
+        .social-icons a {
+          font-size: 1.2em; /* Reducir el tamaño de los iconos sociales */
+        }
+      
+        .social-icons i {
+          margin-right: 5px; /* Reducir el espacio entre iconos sociales */
+        }
+    }
+  }

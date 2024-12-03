@@ -1,0 +1,124 @@
+.home-container {
+    text-align: center;
+    padding: 3rem;
+    background-color: #F3F3F3; /* Color de fondo para toda la página */
+    margin-top: 90px;
+}
+
+.home-header {
+    padding: 3rem 0;
+    color: white;
+    border-radius: 15px;
+    margin-bottom: 4rem;
+    background-color: #F3F3F3;
+    color: #504683;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Agregar sombra */
+}
+
+.home-title {
+    font-size: 2.8rem;
+    font-weight: bold;
+    color: #504683;
+    margin: 0;
+}
+
+.home-subtitle {
+    font-size: 1.3rem;
+    margin-top: 0.5rem;
+    font-weight: 300;
+    color: #504683;
+}
+
+.home-content {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.home-section {
+    padding: 2rem;
+    background-color: #F3F3F3; /* Fondo de sección */
+    color: #504683;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    margin: 1rem;
+    flex-basis: 45%;
+    max-width: 45%;
+    transition: transform 0.3s ease;
+}
+
+.home-section h2 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    color: #504683;
+    font-weight: bold;
+}
+
+.home-section p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    color: #504683;
+}
+
+#p {
+    color: #504683;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.2rem;
+    color: white;
+    background: linear-gradient(90deg, rgba(17,107,103,1) 0%, rgba(46,204,194,1) 26%, rgba(38,179,219,1) 100%);
+    border: none;
+    border-radius: 30px;  /* Bordes redondeados */
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Sombra para profundidad */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-weight: bold;
+}
+
+.btn:hover {
+    background-color: #e91e63;
+    transform: scale(1.1);  /* Aumento de tamaño al pasar el mouse */
+}
+
+.card {
+    background: linear-gradient(90deg, rgba(64,17,107,1) 0%, rgba(120,46,204,1) 26%, rgba(192,180,208,1) 100%);
+}
+
+/* Media Queries para Responsive Design */
+@media (max-width: 768px) {
+    .home-title {
+        font-size: 2.2rem;
+    }
+
+    .home-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .home-section {
+        flex-basis: 100%;
+        max-width: 100%;
+    }
+
+    .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-title {
+        font-size: 1.7rem;
+    }
+
+    .home-subtitle {
+        font-size: 1rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+}

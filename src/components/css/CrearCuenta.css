@@ -1,0 +1,61 @@
+/* css/CrearCuenta.css */
+
+.container {
+    margin-top: 50px;
+  }
+  
+  .card {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-label {
+    font-weight: bold;
+  }
+  
+  .form-control {
+    border-radius: 4px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-primary {
+    background-color: #5fbcc0;
+    border-color: #5fbcc0;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .btn-primary:hover {
+    background-color: #4a9c9a;
+    border-color: #4a9c9a;
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+  }
+  
+  .alert {
+    margin-top: 20px;
+    color: red;
+    font-weight: bold;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  a {
+    color: #5fbcc0;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }

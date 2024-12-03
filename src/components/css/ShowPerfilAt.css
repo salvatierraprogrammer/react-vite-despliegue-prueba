@@ -1,0 +1,38 @@
+/* Asegúrate de que estos estilos estén incluidos en tu archivo CSS */
+.card-body {
+    text-align: left;
+  }
+  
+  .profile-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .profile-details .card-text {
+    margin-bottom: 1rem;
+  }
+  
+  .profile-details i {
+    color: #007bff; /* Color para los íconos */
+  }
+  
+  .patient-photo {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+  }
+  
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .badge {
+    font-size: 0.9rem;
+  }
+  .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Ajusta el espacio entre los botones según lo necesites */
+  }

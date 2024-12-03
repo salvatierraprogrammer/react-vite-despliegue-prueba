@@ -1,0 +1,85 @@
+/* Estilos para el navbar */
+.app-bar {
+    background-color: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(11,9,121,1) 36%, rgba(0,212,255,1) 100%) ;
+    background: rgb(2,0,36);
+    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(11,9,121,1) 36%, rgba(0,212,255,1) 100%); /* Color azul de Facebook */
+    padding: 0 16px;
+  }
+
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1040; /* Asegúrate de que el z-index del header sea menor que el del modal */
+  }
+  .app-bar .logo {
+    flex-grow: 1;
+    font-size: 1.5rem;
+    color: white;
+    text-decoration: none;
+  }
+  
+  .app-bar .menu-icon {
+    color: white;
+  }
+  
+  .app-bar .nav-links {
+    display: flex;
+    align-items: center;
+  }
+  
+  .app-bar .nav-links .btn {
+    color: white;
+    margin-left: 16px;
+  }
+  
+  .app-bar .nav-links .btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  
+  .app-bar .profile-menu {
+    display: flex;
+    align-items: center;
+  }
+  
+  .profile-menu .profile-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 16px;
+  }
+  
+  .profile-menu .sign-out {
+    color: white;
+  }
+  
+  .profile-menu .sign-out:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1040; /* Asegúrate de que el z-index del header sea menor que el del modal */
+  } 
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .app-bar .nav-links {
+      display: none; /* Hide navigation links on mobile */
+    }
+    
+    .app-bar .menu-icon {
+      display: block;
+    }
+  
+    .app-bar .profile-menu .profile-image {
+      display: none; /* Hide profile image on mobile */
+    }
+  }

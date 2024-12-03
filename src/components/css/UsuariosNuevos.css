@@ -1,0 +1,24 @@
+/* CvRecibido.css */
+.table-custom {
+    background: rgb(64,17,107);
+    background: linear-gradient(90deg, rgba(64,17,107,1) 0%, rgba(206,171,246,1) 26%, rgba(106,28,207,1) 100%);
+   
+  }
+  
+  .table-custom th,
+  .table-custom td {
+    border-color: rgba(240, 239, 239, 0.1);
+    background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(11,9,121,1) 36%, rgba(0,212,255,1) 100%);
+    color: aliceblue;
+}
+  
+  .table-custom thead th {
+    background: rgba(64, 17, 107, 0.8); /* Fondo ligeramente diferente para el encabezado si lo prefieres */
+    color: aliceblue;
+}
+  .theadAgregarColor{
+    background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(11,9,121,1) 36%, rgba(0,212,255,1) 100%);
+    color: aliceblue;
+  }

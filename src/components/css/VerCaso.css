@@ -1,0 +1,134 @@
+/* Ver caso css Contenedor principal */
+.container {
+  
+  margin-top: 20px;
+  background-color: '#F3F3F3';
+  background: '#F3F3F3';
+}
+
+/* Tarjeta principal */
+.card {
+  max-width: 500px; /* Establece un ancho máximo */
+  margin: 0 auto; /* Centra la tarjeta horizontalmente */
+background-color: '#F3F3F3';
+background:'#F3F3F3';
+}
+
+/* Imagen dentro de la tarjeta (para imágenes grandes) */
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Cuerpo de la tarjeta */
+.card-body {
+  padding: 15px;
+  background-color: '#F3F3F3';
+  background:'#F3F3F3';
+}
+
+/* Imagen del paciente */
+.patient-photo {
+  width: 100px; /* Ajusta el tamaño de la imagen */
+  height: 100px; /* Ajusta el tamaño de la imagen */
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+/* Título de la tarjeta */
+.card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Texto de la tarjeta */
+.card-text {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+/* Iconos dentro del texto de la tarjeta */
+.card-text i {
+  margin-right: 8px;
+}
+
+/* Elementos de la lista de correos enviados */
+.list-group-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  padding: 10px;
+  background: rgb(2,0,36);
+  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(11,9,121,1) 36%, rgba(0,212,255,1) 100%);
+}
+
+/* Párrafos dentro de los elementos de la lista */
+.list-group-item p {
+  margin: 0;
+  padding: 4px 0;
+}
+
+/* Estilo centrado */
+.text-center {
+  text-align: center;
+}
+.mail-enviados {
+  margin-top: 20px;
+};
+
+/* Espaciado */
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+/* Sombra suave */
+.shadow-sm {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón */
+.btn {
+  display: flex;
+  align-items: center;
+}
+
+/* Icono dentro del botón */
+.btn .fa-icon {
+  margin-right: 8px;
+}
+/* Clase para ajustar la altura del contenedor del botón */
+.text-height {
+  margin-top: 20px; /* Añade margen superior para separar del contenido anterior */
+  text-align: center;
+  margin-bottom: 20px; /* Centra el contenido horizontalmente */
+}
+
+/* Estilo específico para el botón */
+.btn-secondary {
+  padding: 10px 20px; /* Ajusta el padding para el botón */
+  font-size: 16px; /* Ajusta el tamaño de la fuente del botón */
+  border-radius: 5px; /* Opcional: añade bordes redondeados al botón */
+}
+.cardCAmbiarColor{
+  background: rgb(2,0,36);
+  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(11,9,121,1) 36%, rgba(0,212,255,1) 100%);
+}
+.cardAgregarCard{
+  background-color: '#F3F3F3';
+}
+/* Estilo responsivo para el botón */
+@media (max-width: 768px) {
+  .btn {
+      font-size: 14px;
+  }
+}
