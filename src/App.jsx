@@ -31,7 +31,6 @@ const theme = createTheme({
     mode: 'light', // o 'dark', dependiendo de tu preferencia
     primary: {
       main: '#1976d2',
-    
     },
     secondary: {
       main: '#dc004e',
@@ -47,35 +46,34 @@ const theme = createTheme({
 
 function App() {
   return (
-    <div className="App" >
+    <div className="App">
       <Router basename={process.env.NODE_ENV === 'production' ? '/acompaniante-terapeutico' : ''}>
-      {/* <Router basename="/acompaniante-terapeutico"> */}
         <ThemeProvider theme={theme}>
           <Header />
           <main className="main-content">
             <Routes>
-              <Route path='/' element={<Show />} />
-              <Route path='/acompaniante-terapeutico' element={<Iniciar />} />
-              <Route path='/buscar-trabajo' element={<BuscarTrabajo />} />
-              <Route path='/buscar-acompanante' element={<BuscarAcompanante />} />
-              <Route path='/showPerfil/:id' element={<ShowPerfilAt />} />
-              <Route path='/misPublicaciones' element={<MisPublicaciones />} />
-              <Route path='/nuevaPublicacion' element={<NuevaPublicacion />} />
-              <Route path='/perfilLaboralUpdate' element={<PerfilLaboralUpdate />} />
-              <Route path='/cvEnvidos' element={<CvEnviados />} />
-              <Route path='/login' element={<Login />} />
-              <Route path='/crearCuenta' element={<CrearCuenta />} />
-              <Route path='/editarPerfilLaboral' element={<EditarPerfilLaboral />} />
+              <Route path="/" element={<Show />} />
+              <Route path="/acompaniante-terapeutico" element={<Iniciar />} />
+              <Route path="/buscar-trabajo" element={<BuscarTrabajo />} />
+              <Route path="/buscar-acompanante" element={<BuscarAcompanante />} />
+              <Route path="/showPerfil/:id" element={<ShowPerfilAt />} />
+              <Route path="/misPublicaciones" element={<MisPublicaciones />} />
+              <Route path="/nuevaPublicacion" element={<NuevaPublicacion />} />
+              <Route path="/perfilLaboralUpdate" element={<PerfilLaboralUpdate />} />
+              <Route path="/cvEnvidos" element={<CvEnviados />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/crearCuenta" element={<CrearCuenta />} />
+              <Route path="/editarPerfilLaboral" element={<EditarPerfilLaboral />} />
               <Route path="/crear-perfil-laboral" element={<CrearPerfilLaboral />} />
-              <Route path='/miCuenta' element={<MiCuenta />} />
-              <Route path='/admin' element={<Administrador />} />
-              <Route path='/usuarios-nuevos' element={<UsuariosNuevos />} />
-              <Route path='/generarFlyer/:id' element={<GenerarFlyer />} />
-              <Route path='/verCaso/:id' element={<VerCaso />} />
-              <Route path='/ver-usuario/:id' element={<VerUsuarios />} />
-              <Route path='/cv-recibido' element={<CvRecibido />} />
-              <Route path='/create' element={<Create />} />
-              <Route path='/edit/:id' element={<Edit />} />
+              <Route path="/miCuenta" element={<MiCuenta />} />
+              <Route path="/admin" element={<Administrador />} />
+              <Route path="/usuarios-nuevos" element={<UsuariosNuevos />} />
+              <Route path="/generarFlyer/:id" element={<GenerarFlyer />} />
+              <Route path="/verCaso/:id" element={<VerCaso />} />
+              <Route path="/ver-usuario/:id" element={<VerUsuarios />} />
+              <Route path="/cv-recibido" element={<CvRecibido />} />
+              <Route path="/create" element={<Create />} />
+              <Route path="/edit/:id" element={<Edit />} />
             </Routes>
           </main>
           <Footer />
@@ -84,4 +82,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
