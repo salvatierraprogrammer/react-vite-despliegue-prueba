@@ -48,6 +48,7 @@ function App() {
   return (
     <div className="App">
       <Router basename={process.env.NODE_ENV === 'production' ? '/acompaniante-terapeutico' : ''}>
+      
         <ThemeProvider theme={theme}>
           <Header />
           <main className="main-content">
