@@ -100,7 +100,7 @@ const Header = () => {
   };
 
   return (
- <AppBar className="app-bar" sx={{ backgroundColor: '#F3F3F3', boxShadow: 'none' }}>
+<AppBar className="app-bar" sx={{ backgroundColor: '#F3F3F3', boxShadow: 'none' }}>
   <Container maxWidth="lg">
     <Toolbar>
       {isMobile && (
@@ -114,11 +114,18 @@ const Header = () => {
           <MenuIcon sx={{ color: '#504683' }} />
         </IconButton>
       )}
-      <Typography variant="h4" className="logo">
-        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <img src={logo} alt="Logo" style={{ background: 'transparent', maxHeight: '99px' }} />
-        </Link>
-      </Typography>
+
+      {/* Navegación */}
+      {!isMobile && (
+        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
+          <Typography variant="h4" className="logo">
+            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <img src={logo} alt="Logo" style={{ background: 'transparent', maxHeight: '99px' }} />
+            </Link>
+          </Typography>
+        </Box>
+      )}
+
       {!isMobile && (
         <Box className="nav-links">
           {userRol === 'guest' && (
@@ -238,6 +245,38 @@ const Header = () => {
 
       {/* Mobile Drawer */}
       <Drawer anchor="left" open={mobileMenuOpen} onClose={toggleMobileMenu}>
+      <div style={{
+  display: 'flex',
+  justifyContent: 'center',  // Centra el contenido horizontalmente
+  alignItems: 'center',      // Centra el contenido verticalmente
+}}>
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',  // Centra el contenido horizontalmente
+      alignItems: 'center',      // Centra el contenido verticalmente
+      borderRadius: '50%',       // Asegura que sea un círculo perfecto
+      backgroundColor: '#F3F3F3',
+      padding: '16px',           // Ajuste el padding para margen uniforme
+      width: '120px',            // Tamaño del círculo
+      height: '120px',           // Tamaño del círculo
+      boxSizing: 'border-box',
+      marginTop: 1,   // Asegura que el padding no afecte el tamaño total
+    }}
+  >
+    <Link to="/" style={{ textDecoration: 'none' }}>
+      <img
+        src={logo}
+        alt="Logo"
+        style={{
+          background: 'transparent',
+          maxHeight: '99px',       // Controla la altura máxima de la imagen
+          width: 'auto',           // Asegura que la imagen mantenga la proporción
+        }}
+      />
+    </Link>
+  </Box>
+</div>
         <Box sx={{ width: 250, display: 'flex', flexDirection: 'column', padding: 2 }}>
           {userRol === 'guest' && (
             <>

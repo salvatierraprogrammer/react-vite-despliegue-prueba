@@ -1,11 +1,20 @@
-import React from 'react';
+import React from 'react'; 
 import { Link } from 'react-router-dom';
 import { Container, Typography, Box, Button } from '@mui/material';
 
 const Home = () => {
     return (
         <Container sx={{ padding: '3rem 1rem', marginTop: '90px', textAlign: 'center' }}>
-            <Box sx={{ padding: '2rem', backgroundColor: '#ffffff', borderRadius: '15px', boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)', marginBottom: '3rem' }}>
+            <Box
+                sx={{
+                    padding: '2rem',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '15px',
+                    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
+                    marginBottom: '3rem',
+                    animation: 'fadeIn 1s ease-out',
+                }}
+            >
                 <Typography variant="h3" sx={{ color: '#504683', fontWeight: 'bold' }}>
                     Bienvenido a Nuestra Plataforma de Acompañantes Terapéuticos
                 </Typography>
@@ -15,7 +24,21 @@ const Home = () => {
             </Box>
             
             <Box sx={{ display: 'flex', justifyContent: 'space-evenly', flexWrap: 'wrap', gap: '1.5rem' }}>
-                <Box sx={{ padding: '2rem', backgroundColor: '#ffffff', borderRadius: '15px', boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)', flexBasis: '45%', maxWidth: '45%' }}>
+                <Box
+                    sx={{
+                        padding: '2rem',
+                        backgroundColor: '#ffffff',
+                        borderRadius: '15px',
+                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
+                        flexBasis: '45%',
+                        maxWidth: '45%',
+                        animation: 'fadeInUp 1s ease-out',
+                        '@media (max-width: 600px)': {
+                            flexBasis: '100%',
+                            maxWidth: '100%',
+                        },
+                    }}
+                >
                     <Typography variant="h5" sx={{ color: '#504683', fontWeight: 'bold' }}>
                         Busco Acompañante Terapéutico
                     </Typography>
@@ -36,13 +59,28 @@ const Home = () => {
                                 backgroundColor: '#0D7059',
                                 transform: 'scale(1.05)',
                             },
+                            transition: 'transform 0.3s ease, background-color 0.3s ease',
                         }}
                     >
                         Buscar Acompañante
                     </Button>
                 </Box>
                 
-                <Box sx={{ padding: '2rem', backgroundColor: '#ffffff', borderRadius: '15px', boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)', flexBasis: '45%', maxWidth: '45%' }}>
+                <Box
+                    sx={{
+                        padding: '2rem',
+                        backgroundColor: '#ffffff',
+                        borderRadius: '15px',
+                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
+                        flexBasis: '45%',
+                        maxWidth: '45%',
+                        animation: 'fadeInUp 1s ease-out',
+                        '@media (max-width: 600px)': {
+                            flexBasis: '100%',
+                            maxWidth: '100%',
+                        },
+                    }}
+                >
                     <Typography variant="h5" sx={{ color: '#504683', fontWeight: 'bold' }}>
                         Busco Trabajo como Acompañante Terapéutico
                     </Typography>
@@ -63,6 +101,7 @@ const Home = () => {
                                 backgroundColor: '#0D7059',
                                 transform: 'scale(1.05)',
                             },
+                            transition: 'transform 0.3s ease, background-color 0.3s ease',
                         }}
                     >
                         Buscar Trabajo
