@@ -117,13 +117,21 @@ const Header = () => {
 
       {/* Navegación */}
       {!isMobile && (
-        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
-          <Typography variant="h4" className="logo">
-            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <img src={logo} alt="Logo" style={{ background: 'transparent', maxHeight: '99px' }} />
-            </Link>
-          </Typography>
-        </Box>
+       <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
+       <Typography variant="h4" className="logo">
+         <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+           <img
+             src={logo}
+             alt="Logo"
+             style={{
+               background: 'transparent',
+               maxHeight: '99px',
+               filter: 'drop-shadow(0 0 10px rgba(0, 0, 0, 0.8))' // Corrected filter property
+             }}
+           />
+         </Link>
+       </Typography>
+     </Box>
       )}
 
       {!isMobile && (
