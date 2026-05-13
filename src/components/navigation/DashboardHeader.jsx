@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebaseConfg/firebase';
 import { useAuth } from '../../context/AuthContext';
+import { useThemeMode } from '../../context/ThemeModeContext';
 import { colors } from '../../theme/theme';
 import {
   Search,
@@ -96,6 +97,7 @@ const NotificationItem = memo(({ notification }) => (
 
 export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
   const { userData, userRol } = useAuth();
+  const { mode, toggleTheme } = useThemeMode();
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifAnchor, setNotifAnchor] = useState(null);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -217,8 +219,9 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
             </Box>
           </SearchContainer>
 
-          <Tooltip title="Modo oscuro">
+          <Tooltip title={mode === 'dark' ? 'Modo claro' : 'Modo oscuro'}>
             <IconButton
+              onClick={toggleTheme}
               sx={{
                 width: 40,
                 height: 40,
@@ -227,7 +230,7 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
                 '&:hover': { backgroundColor: alpha(colors.primary, 0.06) },
               }}
             >
-              <Moon size={18} />
+              {mode === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </IconButton>
           </Tooltip>
 

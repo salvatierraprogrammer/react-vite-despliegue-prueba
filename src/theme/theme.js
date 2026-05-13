@@ -75,7 +75,7 @@ const palette = {
   },
 };
 
-export const colors = {
+const lightColors = {
   primary: palette.navy[500],
   primaryLight: palette.navy[400],
   primaryDark: palette.navy[700],
@@ -98,9 +98,61 @@ export const colors = {
   gray: palette.slate,
 };
 
-const theme = createTheme({
+const darkColors = {
+  primary: palette.navy[300],
+  primaryLight: palette.navy[200],
+  primaryDark: palette.navy[400],
+  secondary: palette.violet[300],
+  secondaryLight: palette.violet[200],
+  success: palette.emerald[300],
+  successLight: palette.emerald[200],
+  warning: palette.amber[300],
+  warningLight: palette.amber[200],
+  danger: palette.rose[300],
+  dangerLight: palette.rose[200],
+  background: '#0F172A',
+  surface: '#1E293B',
+  surfaceSecondary: '#334155',
+  textPrimary: palette.slate[100],
+  textSecondary: palette.slate[400],
+  textMuted: palette.slate[500],
+  border: palette.slate[700],
+  borderHover: palette.slate[600],
+  gray: {
+    50: '#0F172A',
+    100: '#1E293B',
+    200: '#334155',
+    300: '#475569',
+    400: '#64748B',
+    500: '#94A3B8',
+    600: '#CBD5E1',
+    700: '#E2E8F0',
+    800: '#F1F5F9',
+    900: '#F8FAFC',
+  },
+};
+
+let currentMode = 'light';
+
+export const setColorMode = (mode) => {
+  currentMode = mode;
+};
+
+export const colors = new Proxy({}, {
+  get(target, prop) {
+    const source = currentMode === 'dark' ? darkColors : lightColors;
+    return source[prop];
+  },
+});
+
+export const getColors = (mode) => mode === 'dark' ? darkColors : lightColors;
+
+const createThemeWithMode = (mode) => {
+  setColorMode(mode);
+
+  return createTheme({
   palette: {
-    mode: 'light',
+    mode,
     primary: {
       main: colors.primary,
       light: colors.primaryLight,
@@ -335,6 +387,7 @@ const theme = createTheme({
       },
     },
   },
-});
+  });
+};
 
-export default theme;
+export default createThemeWithMode;
