@@ -1,44 +1,44 @@
 export const textoColor = [
-    'black',
+    '#000000',
     '#fff',
-    '#FF5733',  // Rojo Anaranjado
-    '#33FF57',  // Verde Lima
-    '#3357FF',  // Azul Brillante
-    '#FFD700',  // Dorado
-    '#8A2BE2',  // Azul Violeta
-    'black',
+    '#FF5733',
+    '#33FF57',
+    '#3357FF',
+    '#FFD700',
+    '#8A2BE2',
+    '#000000',
     '#fff',
-    '#FF69B4',  // Rosa Chicle
-    '#4B0082',  // Índigo
-    '#00CED1',  // Turquesa Oscuro
-    '#FF4500',  // Naranja Rojo
-    '#2E8B57',  // Verde Mar
-    'black',
+    '#FF69B4',
+    '#4B0082',
+    '#00CED1',
+    '#FF4500',
+    '#2E8B57',
+    '#000000',
     '#fff',
-    '#DAA520',  // Amarillo Dorado
-    '#40E0D0',  // Turquesa
-    '#FF6347',  // Tomate
-    '#4682B4',  // Azul Acero
-    '#800000',  // Marrón Oscuro
-    '#FF1493',  // Rosa Profundo
-    '#7FFF00',  // Verde Lima Claro
-    'black',
+    '#DAA520',
+    '#40E0D0',
+    '#FF6347',
+    '#4682B4',
+    '#800000',
+    '#FF1493',
+    '#7FFF00',
+    '#000000',
     '#fff',
-    '#FF7F50',  // Coral
-    '#6A5ACD',  // Pizarra Azul
-    '#20B2AA',  // Verde Pálido
-    '#DC143C',  // Carmesí
-    '#00FA9A',  // Verde Esmeralda
-    'black',
+    '#FF7F50',
+    '#6A5ACD',
+    '#20B2AA',
+    '#DC143C',
+    '#00FA9A',
+    '#000000',
     '#fff',
-    '#B22222',  // Rojo Fuego
-    '#7B68EE',  // Azul Media Noche
-    '#ADFF2F',  // Verde Amarillento
-    '#B0C4DE',  // Azul Paloma
-    '#FF00FF',  // Fucsia
-    'black',
+    '#B22222',
+    '#7B68EE',
+    '#ADFF2F',
+    '#B0C4DE',
+    '#FF00FF',
+    '#000000',
     '#fff',
-    '#FFA07A',  // Salmón Claro
-    '#6495ED',  // Azul Maíz
-    '#D2691E',  // Marrón Chocolate
+    '#FFA07A',
+    '#6495ED',
+    '#D2691E',
   ];

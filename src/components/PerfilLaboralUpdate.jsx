@@ -95,7 +95,7 @@ const PerfilLaboralUpdate = () => {
               </IconButton>
                 </div>
                 {/* Edit Profile Button */}
-                <Link to="/editarPerfilLaboral">
+                <Link to={`/editarPerfilLaboral/${auth.currentUser?.uid}`}>
                   <Button
                     variant="contained"
                     color="primary"

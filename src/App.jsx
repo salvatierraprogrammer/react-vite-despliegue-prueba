@@ -1,87 +1,111 @@
-import './App.css';
-import Show from './components/Show';
-import Create from './components/Create';
-import Edit from './components/Edit';
+import React, { useMemo } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import BuscarTrabajo from './components/BuscarTrabajo';
-import BuscarAcompanante from './components/BuscarAcompanante';
-import ShowPerfilAt from './components/ShowPerfilAt';
-import MisPublicaciones from './components/MisPublicaciones';
-import NuevaPublicacion from './components/NuevaPublicacion';
-import MiCuenta from './components/MiCuenta';
-import CvEnviados from './components/CvEnviados';
-import PerfilLaboralUpdate from './components/PerfilLaboralUpdate';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import createThemeWithMode from './theme/theme';
+import { AuthProvider } from './context/AuthContext';
+import { ThemeModeProvider, useThemeMode } from './context/ThemeModeContext';
+import { PublicLayout } from './layout/PublicLayout';
+import { DashboardLayout } from './components/layout/DashboardLayout';
+import Show from './pages/public/Show';
+import Iniciar from './pages/public/Iniciar';
+import BuscarTrabajo from './pages/at/BuscarTrabajo';
+import BuscarAcompanante from './pages/public/BuscarAcompanante';
+import ShowPerfilAt from './pages/at/ShowPerfilAt';
+import ShowPerfilReclutador from './pages/reclutador/ShowPerfilReclutador';
 import Login from './auth/Login';
 import CrearCuenta from './auth/CrearCuenta';
-import EditarPerfilLaboral from './components/EditarPerfilLaboral';
-import CrearPerfilLaboral from './components/CrearPerfilLaboral';
-import Header from './layout/Header';
-import Footer from './layout/Footer';
-import VerCaso from './components/VerCaso';
-import Administrador from './components/Administrador';
-import UsuariosNuevos from './components/UsuariosNuevos';
-import VerUsuarios from './components/VerUsuarios';
-import CvRecibido from './components/CvRecibido';
-import Iniciar from './components/Iniciar';
-import GenerarFlyer from './components/GenerarFlyer';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import MisPublicaciones from './pages/reclutador/MisPublicaciones';
+import NuevaPublicacion from './pages/reclutador/NuevaPublicacion';
+import CvEnviados from './pages/at/CvEnviados';
+import CvRecibido from './pages/reclutador/CvRecibido';
+import MiCuenta from './pages/at/MiCuenta';
+import PerfilLaboralUpdate from './pages/at/PerfilLaboralUpdate';
+import EditarPerfilLaboral from './pages/at/EditarPerfilLaboral';
+import CrearPerfilLaboral from './pages/at/CrearPerfilLaboral';
+import VerCaso from './pages/familiar/VerCaso';
+import Administrador from './pages/admin/Administrador';
+import UsuariosNuevos from './pages/admin/UsuariosNuevos';
+import VerUsuarios from './pages/admin/VerUsuarios';
+import ATRegistrados from './pages/admin/ATRegistrados';
+import ATDetalle from './pages/admin/ATDetalle';
+import GenerarFlyer from './pages/familiar/GenerarFlyer';
+import EditarPublicacion from './pages/reclutador/EditarPublicacion';
+import DashboardAT from './pages/at/DashboardAT';
+import DashboardReclutador from './pages/reclutador/DashboardReclutador';
+import DashboardAdmin from './pages/admin/DashboardAdmin';
+import { useAuth } from './context/AuthContext';
 
-const theme = createTheme({
-  palette: {
-    mode: 'light', // o 'dark', dependiendo de tu preferencia
-    primary: {
-      main: '#1976d2',
-    
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-    default: {
-      main: '#f5f5f5',
-    },
-  },
-  typography: {
-    fontFamily: 'Arial, sans-serif',
-  },
-});
+function RoleDashboard() {
+  const { user, userRol, loading } = useAuth();
+  if (loading || !user) return null;
+  try {
+    if (userRol === 'administrador') return <DashboardAdmin />;
+    if (userRol === 'reclutador') return <DashboardReclutador />;
+    return <DashboardAT />;
+  } catch (e) {
+    console.error('Dashboard error:', e);
+    return <DashboardAT />;
+  }
+}
+
+function AppContent() {
+  const { mode } = useThemeMode();
+  const theme = useMemo(() => createThemeWithMode(mode), [mode]);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Routes>
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Show />} />
+            <Route path="/acompaniante-terapeutico" element={<Iniciar />} />
+            <Route path="/showPerfilReclutador/:id" element={<ShowPerfilReclutador />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/crearCuenta" element={<CrearCuenta />} />
+          </Route>
+
+          <Route element={<ProtectedRoute />}>
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard" element={<RoleDashboard />} />
+              <Route path="/buscar-trabajo" element={<BuscarTrabajo />} />
+              <Route path="/buscar-acompanante" element={<BuscarAcompanante />} />
+              <Route path="/showPerfil/:id" element={<ShowPerfilAt />} />
+              <Route path="/showPerfilReclutador/:id" element={<ShowPerfilReclutador />} />
+              <Route path="/admin" element={<Administrador />} />
+              <Route path="/misPublicaciones" element={<MisPublicaciones />} />
+              <Route path="/nuevaPublicacion" element={<NuevaPublicacion />} />
+              <Route path="/editar-publicacion/:id" element={<EditarPublicacion />} />
+              <Route path="/cvEnvidos" element={<CvEnviados />} />
+              <Route path="/miCuenta" element={<MiCuenta />} />
+              <Route path="/perfilLaboralUpdate" element={<PerfilLaboralUpdate />} />
+              <Route path="/editarPerfilLaboral" element={<EditarPerfilLaboral />} />
+              <Route path="/editarPerfilLaboral/:id" element={<EditarPerfilLaboral />} />
+              <Route path="/crear-perfil-laboral" element={<CrearPerfilLaboral />} />
+              <Route path="/usuarios-nuevos" element={<UsuariosNuevos />} />
+              <Route path="/ver-usuario/:id" element={<VerUsuarios />} />
+              <Route path="/at-registrados" element={<ATRegistrados />} />
+              <Route path="/at-registrados/:id" element={<ATDetalle />} />
+              <Route path="/verCaso/:id" element={<VerCaso />} />
+              <Route path="/cv-recibido" element={<CvRecibido />} />
+              <Route path="/generarFlyer/:id" element={<GenerarFlyer />} />
+            </Route>
+          </Route>
+        </Routes>
+      </Router>
+    </ThemeProvider>
+  );
+}
 
 function App() {
   return (
-    <div className="App" >
-      <Router basename={process.env.NODE_ENV === 'production' ? '/acompaniante-terapeutico' : ''}>
-      {/* <Router si el basename="/acompaniante-terapeutico"> */}
-        <ThemeProvider theme={theme}>
-          <Header />
-          <main className="main-content">
-            <Routes>
-              <Route path='/' element={<Show />} />
-              <Route path='/acompaniante-terapeutico' element={<Iniciar />} />
-              <Route path='/buscar-trabajo' element={<BuscarTrabajo />} />
-              <Route path='/buscar-acompanante' element={<BuscarAcompanante />} />
-              <Route path='/showPerfil/:id' element={<ShowPerfilAt />} />
-              <Route path='/misPublicaciones' element={<MisPublicaciones />} />
-              <Route path='/nuevaPublicacion' element={<NuevaPublicacion />} />
-              <Route path='/perfilLaboralUpdate' element={<PerfilLaboralUpdate />} />
-              <Route path='/cvEnvidos' element={<CvEnviados />} />
-              <Route path='/login' element={<Login />} />
-              <Route path='/crearCuenta' element={<CrearCuenta />} />
-              <Route path='/editarPerfilLaboral' element={<EditarPerfilLaboral />} />
-              <Route path="/crear-perfil-laboral" element={<CrearPerfilLaboral />} />
-              <Route path='/miCuenta' element={<MiCuenta />} />
-              <Route path='/admin' element={<Administrador />} />
-              <Route path='/usuarios-nuevos' element={<UsuariosNuevos />} />
-              <Route path='/generarFlyer/:id' element={<GenerarFlyer />} />
-              <Route path='/verCaso/:id' element={<VerCaso />} />
-              <Route path='/ver-usuario/:id' element={<VerUsuarios />} />
-              <Route path='/cv-recibido' element={<CvRecibido />} />
-              <Route path='/create' element={<Create />} />
-              <Route path='/edit/:id' element={<Edit />} />
-            </Routes>
-          </main>
-          <Footer />
-        </ThemeProvider>
-      </Router>
-    </div>
+    <AuthProvider>
+      <ThemeModeProvider>
+        <AppContent />
+      </ThemeModeProvider>
+    </AuthProvider>
   );
 }
 
