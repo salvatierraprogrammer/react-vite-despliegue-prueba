@@ -49,7 +49,7 @@ function App() {
   return (
     <div className="App" >
       <Router basename={process.env.NODE_ENV === 'production' ? '/acompaniante-terapeutico' : ''}>
-      {/* <Router basename="/acompaniante-terapeutico"> */}
+      {/* <Router si basename="/acompaniante-terapeutico"> */}
         <ThemeProvider theme={theme}>
           <Header />
           <main className="main-content">
