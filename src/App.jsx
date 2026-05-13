@@ -23,6 +23,7 @@ import CvRecibido from './pages/reclutador/CvRecibido';
 import MiCuenta from './pages/at/MiCuenta';
 import PerfilLaboralUpdate from './pages/at/PerfilLaboralUpdate';
 import EditarPerfilLaboral from './pages/at/EditarPerfilLaboral';
+import VerNotificaciones from './pages/notifications/VerNotificaciones';
 import CrearPerfilLaboral from './pages/at/CrearPerfilLaboral';
 import VerCaso from './pages/familiar/VerCaso';
 import Administrador from './pages/admin/Administrador';
@@ -70,6 +71,7 @@ function AppContent() {
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<RoleDashboard />} />
+              <Route path="/notificaciones" element={<VerNotificaciones />} />
               <Route path="/buscar-trabajo" element={<BuscarTrabajo />} />
               <Route path="/buscar-acompanante" element={<BuscarAcompanante />} />
               <Route path="/showPerfil/:id" element={<ShowPerfilAt />} />

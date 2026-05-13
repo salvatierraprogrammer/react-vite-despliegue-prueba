@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfg/firebase';
+import { useAuth } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { LoadingPage } from '../../components/feedback/LoadingSpinner';
@@ -52,7 +53,7 @@ const CardFooter = styled(Box)({
   backgroundColor: alpha(colors.background, 0.5),
 });
 
-const InfoRow = ({ icon: Icon, label, value }) => (
+const InfoRow = ({ icon: Icon, label, value, blurred }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
     <Box sx={{
       width: 32, height: 32, borderRadius: '10px',
@@ -66,7 +67,11 @@ const InfoRow = ({ icon: Icon, label, value }) => (
       <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.625rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
         {label}
       </Typography>
-      <Typography variant="body2" sx={{ color: colors.textPrimary, fontWeight: 500, fontSize: '0.8125rem' }} noWrap>
+      <Typography variant="body2" sx={{
+        color: colors.textPrimary, fontWeight: 500, fontSize: '0.8125rem',
+        filter: blurred ? 'blur(4px)' : 'none',
+        userSelect: blurred ? 'none' : 'auto',
+      }} noWrap>
         {value || '-'}
       </Typography>
     </Box>
@@ -74,11 +79,13 @@ const InfoRow = ({ icon: Icon, label, value }) => (
 );
 
 const BuscarAcompanante = () => {
+  const { userRol } = useAuth();
   const [perfilLaboral, setPerfilLaboral] = useState([]);
   const [filteredPerfilLaboral, setFilteredPerfilLaboral] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedZone, setSelectedZone] = useState('Todos');
   const navigate = useNavigate();
+  const canViewData = userRol === 'reclutador' || userRol === 'administrador';
 
   const perfilLaboralCollection = collection(db, 'perfilLaboral');
 
@@ -123,6 +130,13 @@ const BuscarAcompanante = () => {
         confirmButtonText: 'Iniciar sesión'
       }).then((result) => {
         if (result.isConfirmed) navigate('/login');
+      });
+    } else if (!canViewData) {
+      MySwal.fire({
+        title: 'Solo para reclutadores',
+        text: 'Debes tener rol de reclutador para ver los datos del acompañante.',
+        icon: 'info',
+        confirmButtonText: 'Entendido'
       });
     } else {
       navigate(`/showPerfil/${acompananteId}`);
@@ -269,9 +283,9 @@ const BuscarAcompanante = () => {
 
                   <CardBody>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                      <InfoRow icon={MapPin} label="Ubicación" value={`${a.localidad || ''} ${a.zona ? `- ${a.zona}` : ''}`} />
-                      <InfoRow icon={GraduationCap} label="Formación" value={a.formacion} />
-                      <InfoRow icon={Briefcase} label="Experiencia" value={a.experiencia || a.titulo} />
+                      <InfoRow icon={MapPin} label="Ubicación" value={`${a.localidad || ''} ${a.zona ? `- ${a.zona}` : ''}`} blurred={!canViewData} />
+                      <InfoRow icon={GraduationCap} label="Formación" value={a.formacion} blurred={!canViewData} />
+                      <InfoRow icon={Briefcase} label="Experiencia" value={a.experiencia || a.titulo} blurred={!canViewData} />
                     </Box>
                   </CardBody>
 

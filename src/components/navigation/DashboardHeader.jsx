@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Box, InputBase, IconButton, Badge, Avatar, Menu, MenuItem, Typography, Divider, ListItemIcon, Tooltip, Breadcrumbs, Link, Chip } from '@mui/material';
+import { Box, InputBase, IconButton, Badge, Avatar, Menu, MenuItem, Typography, Divider, ListItemIcon, Tooltip, Breadcrumbs, Link, Chip, Dialog, DialogTitle, DialogContent, List, ListItemButton, ListItemText } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -19,6 +19,8 @@ import {
   Moon,
   Sun,
   HelpCircle,
+  LayoutDashboard,
+  Keyboard,
 } from 'lucide-react';
 
 const HeaderContainer = styled(Box)(({ theme }) => ({
@@ -47,8 +49,9 @@ const SearchContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const NotificationItem = memo(({ notification }) => (
+const NotificationItem = memo(({ notification, onClick }) => (
   <Box
+    onClick={onClick}
     sx={{
       display: 'flex',
       alignItems: 'flex-start',
@@ -101,8 +104,78 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifAnchor, setNotifAnchor] = useState(null);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+
+  const searchItems = [
+    { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { label: 'Buscar Acompañante', path: '/buscar-acompanante', icon: Search },
+    { label: 'Buscar Trabajo', path: '/buscar-trabajo', icon: Search },
+    { label: 'Mis Publicaciones', path: '/misPublicaciones', icon: Settings },
+    { label: 'Nueva Publicación', path: '/nuevaPublicacion', icon: Settings },
+    { label: 'CVs Enviados', path: '/cvEnvidos', icon: Settings },
+    { label: 'CVs Recibidos', path: '/cv-recibido', icon: Settings },
+    { label: 'Mi Cuenta', path: '/miCuenta', icon: User },
+    { label: 'Mi Perfil Laboral', path: '/perfilLaboralUpdate', icon: User },
+    { label: 'AT Registrados', path: '/at-registrados', icon: User },
+    { label: 'Usuarios Pendientes', path: '/usuarios-nuevos', icon: User },
+  ];
+
+  const filteredSearch = searchItems.filter(i =>
+    i.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      if (e.key === 'Escape') {
+        setSearchOpen(false);
+        setSearchQuery('');
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  const handleSearchSelect = (path) => {
+    setSearchOpen(false);
+    setSearchQuery('');
+    navigate(path);
+  };
+
+  const handleSearchClose = () => {
+    setSearchOpen(false);
+    setSearchQuery('');
+  };
+
+  const roleNotifications = {
+    empleado: [
+      { id: 1, title: 'Nueva postulación recibida', time: 'Hace 5 min', icon: <User size={16} />, read: false },
+      { id: 2, title: 'Tu CV fue visto por un reclutador', time: 'Hace 1 hora', icon: <User size={16} />, read: false },
+      { id: 3, title: 'Perfil actualizado', time: 'Ayer', icon: <Settings size={16} />, read: true },
+    ],
+    reclutador: [
+      { id: 1, title: 'Nuevo postulante para tu caso', time: 'Hace 10 min', icon: <User size={16} />, read: false },
+      { id: 2, title: 'CV recibido de acompañante', time: 'Hace 2 horas', icon: <User size={16} />, read: false },
+      { id: 3, title: 'Publicación actualizada', time: 'Ayer', icon: <Settings size={16} />, read: true },
+    ],
+    administrador: [
+      { id: 1, title: 'Nuevo usuario registrado', time: 'Hace 15 min', icon: <User size={16} />, read: false },
+      { id: 2, title: 'AT pendiente de verificación', time: 'Hace 30 min', icon: <User size={16} />, read: false },
+      { id: 3, title: 'Reporte semanal disponible', time: 'Ayer', icon: <Settings size={16} />, read: true },
+    ],
+    familiar: [
+      { id: 1, title: 'Postulación a tu caso', time: 'Hace 20 min', icon: <User size={16} />, read: false },
+      { id: 2, title: 'Actualización de caso', time: 'Hace 1 día', icon: <Settings size={16} />, read: true },
+    ],
+  };
+
+  const notifications = roleNotifications[userRol] || roleNotifications.empleado;
 
   const handleProfileClick = (event) => setAnchorEl(event.currentTarget);
   const handleProfileClose = () => setAnchorEl(null);
@@ -117,12 +190,6 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
       console.error('Error al cerrar sesión:', error);
     }
   };
-
-  const notifications = [
-    { id: 1, title: 'Nueva postulación recibida', time: 'Hace 5 min', icon: <User size={16} />, read: false },
-    { id: 2, title: 'Tu CV fue visto', time: 'Hace 1 hora', icon: <User size={16} />, read: false },
-    { id: 3, title: 'Publicación actualizada', time: 'Ayer', icon: <Settings size={16} />, read: true },
-  ];
 
   const getBreadcrumbs = () => {
     const paths = location.pathname.split('/').filter(Boolean);
@@ -189,16 +256,14 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <SearchContainer
-            component={motion.div}
-            whileFocus={{ scale: 1.02 }}
-            sx={{ display: { xs: 'none', md: 'flex' } }}
+            onClick={() => setSearchOpen(true)}
+            sx={{ display: { xs: 'none', md: 'flex' }, cursor: 'pointer' }}
           >
             <Search size={18} color={colors.textMuted} />
             <InputBase
               placeholder="Buscar..."
               sx={{ ml: 1.5, flex: 1, fontSize: '0.875rem' }}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
+              inputProps={{ readOnly: true }}
             />
             <Box
               sx={{
@@ -214,10 +279,66 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
                 fontWeight: 500,
               }}
             >
-              <span>Ctrl</span>
+              <Keyboard size={12} />
               <span>K</span>
             </Box>
           </SearchContainer>
+
+          <Dialog
+            open={searchOpen}
+            onClose={handleSearchClose}
+            fullWidth
+            maxWidth="sm"
+            PaperProps={{
+              sx: { borderRadius: '20px', position: 'fixed', top: '15%', m: 0, alignSelf: 'flex-start' },
+            }}
+          >
+            <Box sx={{ p: 2, pb: 0 }}>
+              <Box sx={{
+                display: 'flex', alignItems: 'center', gap: 1.5,
+                px: 2, py: 1.5, borderRadius: '12px',
+                border: `2px solid ${alpha(colors.primary, 0.3)}`,
+                bgcolor: alpha(colors.primary, 0.04),
+              }}>
+                <Search size={20} color={colors.textMuted} />
+                <InputBase
+                  placeholder="Buscar páginas..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                  sx={{ flex: 1, fontSize: '1rem' }}
+                />
+              </Box>
+            </Box>
+            <DialogContent sx={{ px: 2, pb: 2, mt: 1 }}>
+              {filteredSearch.length === 0 ? (
+                <Typography sx={{ textAlign: 'center', py: 4, color: colors.textMuted }}>
+                  Sin resultados para "{searchQuery}"
+                </Typography>
+              ) : (
+                <List sx={{ p: 0 }}>
+                  {filteredSearch.map((item) => (
+                    <ListItemButton
+                      key={item.path}
+                      onClick={() => handleSearchSelect(item.path)}
+                      sx={{
+                        borderRadius: '10px', mb: 0.5,
+                        '&:hover': { bgcolor: alpha(colors.primary, 0.06) },
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36, color: colors.textSecondary }}>
+                        <item.icon size={18} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.label}
+                        primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
+                      />
+                    </ListItemButton>
+                  ))}
+                </List>
+              )}
+            </DialogContent>
+          </Dialog>
 
           <Tooltip title={mode === 'dark' ? 'Modo claro' : 'Modo oscuro'}>
             <IconButton
@@ -296,12 +417,13 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
               </Typography>
             </Box>
             {notifications.map((notif) => (
-              <NotificationItem key={notif.id} notification={notif} />
+              <NotificationItem key={notif.id} notification={notif} onClick={() => { handleNotifClose(); navigate('/notificaciones'); }} />
             ))}
             <Divider />
             <Box sx={{ p: 1.5 }}>
               <Typography
                 variant="body2"
+                onClick={() => { handleNotifClose(); navigate('/notificaciones'); }}
                 sx={{
                   textAlign: 'center',
                   color: colors.primary,
@@ -372,23 +494,27 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
               </Typography>
             </Box>
             <Divider />
+            <MenuItem onClick={() => { navigate('/dashboard'); handleProfileClose(); }} sx={{ py: 1.5 }}>
+              <ListItemIcon>
+                <LayoutDashboard size={18} color={colors.primary} />
+              </ListItemIcon>
+              <Typography sx={{ fontWeight: 600, color: colors.primary }}>Ir al Panel</Typography>
+            </MenuItem>
+            <Divider />
             <MenuItem onClick={() => { navigate('/miCuenta'); handleProfileClose(); }} sx={{ py: 1.5 }}>
               <ListItemIcon>
                 <User size={18} color={colors.textSecondary} />
               </ListItemIcon>
               Mi Cuenta
             </MenuItem>
-            <MenuItem onClick={() => { navigate('/perfilLaboralUpdate'); handleProfileClose(); }} sx={{ py: 1.5 }}>
+            <MenuItem onClick={() => {
+              const perfilPath = userRol === 'empleado' ? '/perfilLaboralUpdate' : '/miCuenta';
+              navigate(perfilPath); handleProfileClose();
+            }} sx={{ py: 1.5 }}>
               <ListItemIcon>
                 <User size={18} color={colors.textSecondary} />
               </ListItemIcon>
               Mi Perfil
-            </MenuItem>
-            <MenuItem onClick={handleProfileClose} sx={{ py: 1.5 }}>
-              <ListItemIcon>
-                <Settings size={18} color={colors.textSecondary} />
-              </ListItemIcon>
-              Configuración
             </MenuItem>
             <Divider />
             <MenuItem onClick={handleSignOut} sx={{ py: 1.5, color: colors.danger }}>

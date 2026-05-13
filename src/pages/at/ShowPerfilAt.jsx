@@ -87,12 +87,14 @@ const TabPanel = ({ children, value, index }) => (
 const ShowPerfilAt = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { userRol } = useAuth();
+  const { user, userRol } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [acompanante, setAcompanante] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tabValue, setTabValue] = useState(0);
+  const canViewContact = userRol === 'reclutador';
+  const canEditProfile = user && (user.uid === acompanante?.userId || userRol === 'administrador');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -172,29 +174,31 @@ const ShowPerfilAt = () => {
                   </Box>
                 </Box>
 
-                <Box sx={{ mt: 2.5, display: 'flex', gap: 1 }}>
-                  {acompanante.email && (
-                    <Tooltip title="Email">
-                      <IconButton href={`mailto:${acompanante.email}`} sx={{ bgcolor: alpha('#fff', 0.14), color: '#fff', '&:hover': { bgcolor: alpha('#fff', 0.25) }, width: 38, height: 38 }}>
-                        <Mail size={17} />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  {acompanante.telefono && (
-                    <Tooltip title="Llamar">
-                      <IconButton href={`tel:${acompanante.telefono}`} sx={{ bgcolor: alpha('#fff', 0.14), color: '#fff', '&:hover': { bgcolor: alpha('#fff', 0.25) }, width: 38, height: 38 }}>
-                        <Phone size={17} />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  {acompanante.telefono && (
-                    <Tooltip title="WhatsApp">
-                      <IconButton href={`https://wa.me/${phoneClean}`} target="_blank" sx={{ bgcolor: alpha('#fff', 0.14), color: '#fff', '&:hover': { bgcolor: alpha('#fff', 0.25) }, width: 38, height: 38 }}>
-                        <MessageCircle size={17} />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </Box>
+                {canViewContact && (
+                  <Box sx={{ mt: 2.5, display: 'flex', gap: 1 }}>
+                    {acompanante.email && (
+                      <Tooltip title="Email">
+                        <IconButton href={`mailto:${acompanante.email}`} sx={{ bgcolor: alpha('#fff', 0.14), color: '#fff', '&:hover': { bgcolor: alpha('#fff', 0.25) }, width: 38, height: 38 }}>
+                          <Mail size={17} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {acompanante.telefono && (
+                      <Tooltip title="Llamar">
+                        <IconButton href={`tel:${acompanante.telefono}`} sx={{ bgcolor: alpha('#fff', 0.14), color: '#fff', '&:hover': { bgcolor: alpha('#fff', 0.25) }, width: 38, height: 38 }}>
+                          <Phone size={17} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {acompanante.telefono && (
+                      <Tooltip title="WhatsApp">
+                        <IconButton href={`https://wa.me/${phoneClean}`} target="_blank" sx={{ bgcolor: alpha('#fff', 0.14), color: '#fff', '&:hover': { bgcolor: alpha('#fff', 0.25) }, width: 38, height: 38 }}>
+                          <MessageCircle size={17} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+                )}
               </Box>
             </ProfileBanner>
 
@@ -231,24 +235,28 @@ const ShowPerfilAt = () => {
                   Contacto
                 </Typography>
                 <Box>
-                  <InfoRow>
-                    <Box sx={{ width: 34, height: 34, borderRadius: '10px', bgcolor: alpha(colors.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: colors.primary }}>
-                      <Mail size={15} />
-                    </Box>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.6rem' }}>Email</Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.8125rem' }} noWrap>{acompanante.email || 'No disponible'}</Typography>
-                    </Box>
-                  </InfoRow>
-                  <InfoRow>
-                    <Box sx={{ width: 34, height: 34, borderRadius: '10px', bgcolor: alpha(colors.success, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: colors.success }}>
-                      <Smartphone size={15} />
-                    </Box>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.6rem' }}>Teléfono</Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.8125rem' }} noWrap>{acompanante.telefono || 'No disponible'}</Typography>
-                    </Box>
-                  </InfoRow>
+                  {canViewContact && (
+                    <>
+                      <InfoRow>
+                        <Box sx={{ width: 34, height: 34, borderRadius: '10px', bgcolor: alpha(colors.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: colors.primary }}>
+                          <Mail size={15} />
+                        </Box>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.6rem' }}>Email</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.8125rem' }} noWrap>{acompanante.email || 'No disponible'}</Typography>
+                        </Box>
+                      </InfoRow>
+                      <InfoRow>
+                        <Box sx={{ width: 34, height: 34, borderRadius: '10px', bgcolor: alpha(colors.success, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: colors.success }}>
+                          <Smartphone size={15} />
+                        </Box>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.6rem' }}>Teléfono</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.8125rem' }} noWrap>{acompanante.telefono || 'No disponible'}</Typography>
+                        </Box>
+                      </InfoRow>
+                    </>
+                  )}
                   <InfoRow>
                     <Box sx={{ width: 34, height: 34, borderRadius: '10px', bgcolor: alpha(colors.secondary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: colors.secondary }}>
                       <MapPin size={15} />
@@ -263,14 +271,14 @@ const ShowPerfilAt = () => {
             </SectionCard>
 
             {/* WhatsApp CTA */}
-            {phoneClean && (
+            {canViewContact && phoneClean && (
               <Button fullWidth variant="contained" startIcon={<Send size={16} />}
                 href={`https://wa.me/${phoneClean}`} target="_blank"
                 sx={{ py: 1.3, borderRadius: '12px', fontWeight: 600, fontSize: '0.875rem', background: 'linear-gradient(135deg, #25D366, #128C7E)', '&:hover': { background: 'linear-gradient(135deg, #20BD5C, #0E7A6B)' } }}>
                 Contactar por WhatsApp
               </Button>
             )}
-            {userRol !== 'reclutador' && (
+            {canEditProfile && (
               <Button fullWidth variant="outlined" startIcon={<Edit size={16} />}
                 onClick={() => navigate(`/editarPerfilLaboral/${id}`)}
                 sx={{ py: 1.3, borderRadius: '12px', fontWeight: 600, fontSize: '0.875rem' }}>

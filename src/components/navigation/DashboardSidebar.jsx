@@ -25,6 +25,7 @@ import {
   Sparkles,
   Clock,
   UserPlus,
+  Bell,
 } from 'lucide-react';
 
 const DRAWER_WIDTH = 260;
@@ -229,6 +230,7 @@ export const DashboardSidebar = ({ open, onToggle, mobileOpen, onMobileClose }) 
   };
 
   const getMenuItems = () => {
+    const notifItem = { label: 'Notificaciones', icon: Bell, path: '/notificaciones' };
     switch (userRol) {
       case 'administrador':
         return [
@@ -237,6 +239,7 @@ export const DashboardSidebar = ({ open, onToggle, mobileOpen, onMobileClose }) 
           { label: 'Nueva Publicación', icon: Briefcase, path: '/nuevaPublicacion' },
           { label: 'Registros AT', icon: Sparkles, path: '/at-registrados' },
           { label: 'Pendientes', icon: Clock, path: '/usuarios-nuevos' },
+          notifItem,
           { label: 'Mi Perfil', icon: User, path: '/miCuenta' },
         ];
       case 'reclutador':
@@ -245,6 +248,7 @@ export const DashboardSidebar = ({ open, onToggle, mobileOpen, onMobileClose }) 
           { label: 'Mis Publicaciones', icon: Briefcase, path: '/misPublicaciones' },
           { label: 'CVs Recibidos', icon: Mail, path: '/cv-recibido' },
           { label: 'Buscar AT', icon: Search, path: '/buscar-acompanante' },
+          notifItem,
           { label: 'Mi Perfil', icon: User, path: '/miCuenta' },
           { label: 'Nueva Publicación', icon: FileText, path: '/nuevaPublicacion' },
         ];
@@ -253,7 +257,7 @@ export const DashboardSidebar = ({ open, onToggle, mobileOpen, onMobileClose }) 
           { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
           { label: 'Mi Perfil', icon: User, path: '/perfilLaboralUpdate' },
           { label: 'CVs Enviados', icon: Send, path: '/cvEnvidos' },
-         
+          notifItem,
         ];
         return items;
       }
@@ -263,6 +267,7 @@ export const DashboardSidebar = ({ open, onToggle, mobileOpen, onMobileClose }) 
           { label: 'Buscar Acompañante', icon: Search, path: '/buscar-acompanante' },
           { label: 'Mis Solicitudes', icon: FileText, path: '/misPublicaciones' },
           { label: 'Publicar Caso', icon: FileText, path: '/nuevaPublicacion' },
+          notifItem,
         ];
       default:
         return [{ label: 'Inicio', icon: Home, path: '/' }];
