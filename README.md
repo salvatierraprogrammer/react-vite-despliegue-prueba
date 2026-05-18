@@ -1,5 +1,5 @@
 # El Canal del AT
-
+s
 Plataforma web que conecta Acompañantes Terapéuticos (AT) con reclutadores y familias, permitiendo la publicación de casos, postulación y gestión de perfiles profesionales.
 
 ## Características Principales
