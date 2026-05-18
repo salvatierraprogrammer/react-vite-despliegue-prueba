@@ -240,18 +240,7 @@ const DashboardReclutador = () => {
         </Box>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {[
-          { icon: <Briefcase size={24} />, title: 'Publicaciones', value: stats.totalPubs, color: colors.primary },
-          { icon: <CheckCircle size={24} />, title: 'Activas', value: stats.activos, color: colors.success, subtitle: 'activas' },
-          { icon: <Mail size={24} />, title: 'CVs Recibidos', value: stats.cvsRecibidos, color: colors.secondary },
-          { icon: <Eye size={24} />, title: 'Vistas Totales', value: stats.vistas, color: colors.warning },
-        ].map((item, i) => (
-          <Grid item xs={12} sm={6} lg={3} key={i}>
-            <StatCard {...item} delay={i} />
-          </Grid>
-        ))}
-      </Grid>
+     
 
       <Grid container spacing={3}>
         <Grid item xs={12} lg={8}>

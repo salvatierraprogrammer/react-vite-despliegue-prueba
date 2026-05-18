@@ -4,14 +4,15 @@ import {
   TextField, InputAdornment, Select, MenuItem, FormControl,
   InputLabel, Card, CardContent, CardActions, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Skeleton, alpha, Badge, Tabs, Tab, Alert, Stack,
+  Skeleton, alpha, Badge, Tabs, Tab, Alert, Stack, Divider,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfg/firebase';
 import { colors } from '../../theme/theme';
+import { generarSlugCompleto, generarShortId } from '../../utils/slugUtils';
 import { LoadingPage } from '../../components/feedback/LoadingSpinner';
 import EnviarCV from '../../components/EnviarCV';
 import {
@@ -19,7 +20,8 @@ import {
   Send, Filter, Briefcase, User, Star, Calendar,
   Eye, ChevronRight, Sparkles, MapPinned,
   Building2, CheckCircle, XCircle, DollarSign,
-  FileText, AlertCircle, SlidersHorizontal, AlertTriangle
+  FileText, AlertCircle, SlidersHorizontal, AlertTriangle,
+  TrendingUp
 } from 'lucide-react';
 
 const SearchContainer = styled(Box)({
@@ -50,33 +52,8 @@ const FilterChip = styled(Chip, { shouldForwardProp: (prop) => prop !== 'selecte
   },
 }));
 
-const PublicacionCard = styled(Card, { shouldForwardProp: (prop) => prop !== 'enviado' })(({ enviado }) => ({
-  borderRadius: '20px',
-  border: `1px solid ${colors.border}`,
-  overflow: 'hidden',
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  backgroundColor: colors.surface,
-  position: 'relative',
-  '&:hover': {
-    borderColor: colors.primary,
-    transform: 'translateY(-4px)',
-    boxShadow: `0 20px 40px -12px ${alpha(colors.primary, 0.15)}`,
-    '& .card-glow': {
-      opacity: 1,
-    },
-  },
-}));
 
-const CardGlow = styled(Box)({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  height: 4,
-  background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-  opacity: 0,
-  transition: 'opacity 0.3s ease',
-});
+
 
 const EmptyState = ({ icon: Icon, title, description, action }) => (
   <Box
@@ -116,6 +93,27 @@ const EmptyState = ({ icon: Icon, title, description, action }) => (
     {action}
   </Box>
 );
+
+const zonaColors = {
+  'CABA': { color: '#6C4CF1', bg: alpha('#6C4CF1', 0.08), border: alpha('#6C4CF1', 0.15) },
+  'Zona Norte': { color: '#10B981', bg: alpha('#10B981', 0.08), border: alpha('#10B981', 0.15) },
+  'Zona Sur': { color: '#F59E0B', bg: alpha('#F59E0B', 0.08), border: alpha('#F59E0B', 0.15) },
+  'Zona Oeste': { color: '#8B5CF6', bg: alpha('#8B5CF6', 0.08), border: alpha('#8B5CF6', 0.15) },
+};
+
+const getTimeAgo = (timestamp) => {
+  if (!timestamp) return '';
+  const date = timestamp?.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
+  const diffMs = Date.now() - date;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'Ahora';
+  if (mins < 60) return `Hace ${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `Hace ${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `Hace ${days}d`;
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+};
 
 const BuscarTrabajo = () => {
   const [publicaciones, setPublicaciones] = useState([]);
@@ -178,7 +176,21 @@ const BuscarTrabajo = () => {
         }
 
         const pubsSnap = await getDocs(publicacionesCollection);
-        setPublicaciones(pubsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        const pubs = pubsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const slugWrites = [];
+        for (const p of pubs) {
+          if (!p.slug && p.id) {
+            const slug = generarSlugCompleto(p.cliente, p.localidad, p.id, p.diagnostico);
+            const shortId = generarShortId(p.id);
+            slugWrites.push(
+              updateDoc(doc(db, 'publicaciones', p.id), { slug, shortId })
+                .then(() => { p.slug = slug; })
+                .catch(() => {})
+            );
+          }
+        }
+        await Promise.all(slugWrites);
+        setPublicaciones(pubs);
 
         const usersSnap = await getDocs(usersCollection);
         setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -308,121 +320,276 @@ const BuscarTrabajo = () => {
       </Box>
 
       {publicacionesDisponibles.length > 0 ? (
-        <Grid container spacing={3}>
-          {publicacionesDisponibles.map((pub, index) => (
-            <Grid item xs={12} md={viewMode === 'grid' ? 6 : 12} lg={viewMode === 'grid' ? 4 : 12} key={pub.id}>
-              <PublicacionCard
+        <Grid container spacing={2.5}>
+          {publicacionesDisponibles.map((pub, index) => {
+            const zoneStyle = zonaColors[pub.zona] || { color: '#6C4CF1', bg: alpha('#6C4CF1', 0.08), border: alpha('#6C4CF1', 0.15) };
+            const timeAgo = getTimeAgo(pub.fechaCreacion);
+            return (
+            <Grid item xs={12} sm={viewMode === 'grid' ? 6 : 12} lg={viewMode === 'grid' ? 4 : 12} key={pub.id}>
+              <Card
                 component={motion.div}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ delay: index * 0.04 }}
                 elevation={0}
-                sx={{ height: '100%' }}
+                sx={{
+                  borderRadius: '16px',
+                  border: `1px solid ${colors.border}`,
+                  bgcolor: colors.surface,
+                  position: 'relative',
+                  overflow: 'visible',
+                  height: '100%',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    borderColor: zoneStyle.color,
+                    transform: 'translateY(-3px)',
+                    boxShadow: `0 16px 32px -8px ${alpha(zoneStyle.color, 0.12)}`,
+                    '& .card-zone-bar': { opacity: 1 },
+                  },
+                }}
               >
-                <CardGlow className="card-glow" />
-                <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      <Avatar
-                        src={pub.photo}
-                        sx={{
-                          width: 56,
-                          height: 56,
-                          border: `3px solid ${alpha(colors.primary, 0.2)}`,
-                          boxShadow: `0 4px 12px ${alpha(colors.primary, 0.15)}`,
-                        }}
-                      >
-                        {pub.cliente?.[0]}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {pub.cliente}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-                          {pub.edad} años • {pub.sexo}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Chip
-                      label={pub.zona || 'Sin zona'}
-                      size="small"
-                      sx={{
-                        bgcolor: alpha(colors.primary, 0.08),
-                        color: colors.primary,
-                        fontWeight: 500,
-                      }}
-                    />
-                  </Box>
+                <Box className="card-zone-bar" sx={{
+                  position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+                  bgcolor: zoneStyle.color, opacity: 0,
+                  transition: 'opacity 0.3s ease',
+                  borderTopLeftRadius: '16px', borderTopRightRadius: '16px',
+                }} />
 
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <MapPinned size={16} color={colors.textMuted} />
-                      <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-                        {pub.localidad}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <FileText size={16} color={colors.textMuted} />
-                      <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-                        <strong>Diagnóstico:</strong> {pub.diagnostico}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      p: 2,
-                      borderRadius: '12px',
-                      bgcolor: alpha(colors.primary, 0.03),
-                      border: `1px solid ${colors.border}`,
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
+                <CardContent sx={{ p: 2.5, '&:last-child': { pb: 1.5 } }}>
+                  <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
+                    <Avatar
+                      src={pub.photo}
                       sx={{
-                        color: colors.textSecondary,
-                        lineHeight: 1.6,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
+                        width: 44, height: 44,
+                        border: `2px solid ${alpha(zoneStyle.color, 0.2)}`,
+                        fontSize: '1rem', fontWeight: 700,
+                        flexShrink: 0,
                       }}
                     >
+                      {pub.cliente?.[0]}
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.25 }}>
+                        <Typography sx={{
+                          fontWeight: 700, fontSize: '0.9375rem', lineHeight: 1.3,
+                          color: colors.textPrimary, overflow: 'hidden',
+                          textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {pub.cliente || pub.titulo}
+                        </Typography>
+                        <Box sx={{
+                          width: 4, height: 4, borderRadius: '50%',
+                          bgcolor: colors.textMuted, flexShrink: 0,
+                        }} />
+                        <Typography sx={{
+                          color: colors.textMuted, fontSize: '0.75rem',
+                          fontWeight: 450, whiteSpace: 'nowrap', flexShrink: 0,
+                        }}>
+                          {timeAgo}
+                        </Typography>
+                      </Stack>
+                      <Typography sx={{
+                        color: colors.textMuted, fontSize: '0.8125rem',
+                        fontWeight: 450,
+                      }}>
+                        {pub.edad ? `${pub.edad} a\u00f1os \u2022 ${pub.sexo}` : ''}
+                      </Typography>
+                    </Box>
+                    <Chip
+                      label={pub.zona || pub.estado || 'Activa'}
+                      size="small"
+                      sx={{
+                        bgcolor: zoneStyle.bg,
+                        color: zoneStyle.color,
+                        fontWeight: 600,
+                        fontSize: '0.6875rem',
+                        height: 24,
+                        borderRadius: '6px',
+                        border: `1px solid ${zoneStyle.border}`,
+                        flexShrink: 0,
+                        mt: 0.25,
+                        '& .MuiChip-label': { px: 0.75 },
+                      }}
+                    />
+                  </Stack>
+
+                  <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+                      <Box sx={{
+                        width: 24, height: 24, borderRadius: '6px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        bgcolor: alpha(colors.primary, 0.06), flexShrink: 0,
+                      }}>
+                        <MapPinned size={12} color={colors.textSecondary} />
+                      </Box>
+                      <Typography sx={{
+                        color: colors.textSecondary, fontSize: '0.8125rem',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {pub.localidad}
+                      </Typography>
+                    </Stack>
+                    {pub.diagnostico && (
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+                        <Box sx={{
+                          width: 24, height: 24, borderRadius: '6px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          bgcolor: alpha(colors.primary, 0.06), flexShrink: 0,
+                        }}>
+                          <FileText size={12} color={colors.textSecondary} />
+                        </Box>
+                        <Typography sx={{
+                          color: colors.textSecondary, fontSize: '0.8125rem',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {pub.diagnostico}
+                        </Typography>
+                      </Stack>
+                    )}
+                    {pub.horario && (
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+                        <Box sx={{
+                          width: 24, height: 24, borderRadius: '6px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          bgcolor: alpha(colors.primary, 0.06), flexShrink: 0,
+                        }}>
+                          <Clock size={12} color={colors.textSecondary} />
+                        </Box>
+                        <Typography sx={{
+                          color: colors.textSecondary, fontSize: '0.8125rem',
+                        }}>
+                          {pub.horario}
+                        </Typography>
+                      </Stack>
+                    )}
+                    {pub.remuneracion && (
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+                        <Box sx={{
+                          width: 24, height: 24, borderRadius: '6px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          bgcolor: alpha('#10B981', 0.08), flexShrink: 0,
+                        }}>
+                          <TrendingUp size={12} color="#10B981" />
+                        </Box>
+                        <Typography sx={{
+                          fontWeight: 600, color: '#10B981', fontSize: '0.8125rem',
+                        }}>
+                          {pub.remuneracion}
+                        </Typography>
+                      </Stack>
+                    )}
+                  </Stack>
+
+                  {pub.descripcion && (
+                    <Typography sx={{
+                      color: colors.textSecondary,
+                      fontSize: '0.8125rem',
+                      lineHeight: 1.6,
+                      mb: 1.5,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}>
                       {pub.descripcion}
                     </Typography>
-                  </Box>
+                  )}
+
+                  {pub.etiquetas?.length > 0 && (
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: 0.5 }}>
+                      {pub.etiquetas.map((tag, i) => (
+                        <Chip
+                          key={i}
+                          label={tag}
+                          size="small"
+                          sx={{
+                            fontSize: '0.6875rem',
+                            fontWeight: 500,
+                            height: 22,
+                            borderRadius: '4px',
+                            bgcolor: alpha(colors.primary, 0.04),
+                            color: colors.textMuted,
+                            border: `1px solid ${alpha(colors.border, 0.5)}`,
+                            '& .MuiChip-label': { px: 0.75 },
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  )}
                 </CardContent>
 
-                <CardActions sx={{ px: 3, pb: 3, justifyContent: 'space-between', gap: 2 }}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<Eye size={14} />}
-                    onClick={() => navigate(`/verCaso/${pub.id}`)}
-                  >
-                    Ver detalle
-                  </Button>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={cvEnviado[pub.id] ? <CheckCircle size={14} /> : <Send size={14} />}
-                    disabled={cvEnviado[pub.id]}
-                    onClick={() => handleShowModal(pub.id)}
-                    sx={{
-                      minWidth: 120,
-                      ...(cvEnviado[pub.id] && {
-                        bgcolor: alpha(colors.success, 0.1),
-                        color: colors.success,
-                        borderColor: colors.success,
-                      }),
-                    }}
-                  >
-                    {cvEnviado[pub.id] ? 'CV enviado' : 'Enviar CV'}
-                  </Button>
-                </CardActions>
-              </PublicacionCard>
+                <Divider sx={{ mx: 2.5, borderColor: alpha(colors.border, 0.5) }} />
+
+                <Box sx={{ px: 2.5, py: 1.5 }}>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Button
+                      variant="text"
+                      size="small"
+                      startIcon={<Eye size={15} />}
+                      onClick={() => navigate(pub.slug ? `/ver-caso/${pub.slug}` : `/ver-caso/${pub.id}`)}
+                      sx={{
+                        color: colors.textMuted,
+                        fontWeight: 500,
+                        fontSize: '0.8125rem',
+                        borderRadius: '8px',
+                        px: 1.5,
+                        minHeight: 34,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: alpha(colors.primary, 0.06),
+                          color: colors.primary,
+                        },
+                      }}
+                    >
+                      Ver detalle
+                    </Button>
+
+                    <Box sx={{ flex: 1 }} />
+
+                    {cvEnviado[pub.id] ? (
+                      <Box sx={{
+                        display: 'flex', alignItems: 'center', gap: 0.5,
+                        px: 1.5, py: 0.625, borderRadius: '8px',
+                        bgcolor: alpha('#10B981', 0.08),
+                        border: `1px solid ${alpha('#10B981', 0.2)}`,
+                      }}>
+                        <CheckCircle size={14} color="#10B981" />
+                        <Typography sx={{ fontWeight: 600, color: '#10B981', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                          Postulado
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disableElevation
+                        startIcon={<Send size={14} />}
+                        onClick={() => handleShowModal(pub.id)}
+                        sx={{
+                          borderRadius: '8px',
+                          fontWeight: 600,
+                          fontSize: '0.8125rem',
+                          minHeight: 34,
+                          px: 2,
+                          bgcolor: '#6C4CF1',
+                          color: '#fff',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            bgcolor: '#5B3FE0',
+                            transform: 'translateY(-1px)',
+                            boxShadow: `0 4px 12px ${alpha('#6C4CF1', 0.3)}`,
+                          },
+                        }}
+                      >
+                        Postularme
+                      </Button>
+                    )}
+                  </Stack>
+                </Box>
+              </Card>
             </Grid>
-          ))}
+            );
+          })}
         </Grid>
       ) : (
         <EmptyState

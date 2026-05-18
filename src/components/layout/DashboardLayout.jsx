@@ -1,50 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, createContext, useContext, memo } from 'react';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import { Outlet } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Outlet, useLocation } from 'react-router-dom';
 import { DashboardSidebar } from '../navigation/DashboardSidebar';
 import { DashboardHeader } from '../navigation/DashboardHeader';
 import { useAuth } from '../../context/AuthContext';
 import { colors } from '../../theme/theme';
 
-const MainLayout = styled(Box)({
-  display: 'flex',
-  minHeight: '100vh',
-  backgroundColor: colors.background,
-});
+const BreadcrumbContext = createContext();
+export const useBreadcrumb = () => useContext(BreadcrumbContext);
 
-const MainContent = styled('main')({
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  minWidth: 0,
-});
-
-const ContentArea = styled(Box)({
-  flex: 1,
-  padding: '32px',
-  '@media (max-width: 900px)': {
-    padding: '16px',
+const pageVariants = {
+  initial: { opacity: 0, y: 10 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
   },
-});
+  exit: {
+    opacity: 0,
+    y: -6,
+    transition: { duration: 0.15, ease: 'easeIn' },
+  },
+};
+
+const PageContent = memo(({ pathname, children }) => (
+  <AnimatePresence mode="wait">
+    <motion.div
+      key={pathname}
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+    >
+      {children}
+    </motion.div>
+  </AnimatePresence>
+));
 
 export const DashboardLayout = () => {
   const { userData, userRol } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [caseTitle, setCaseTitle] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
+  const location = useLocation();
 
   const handleToggle = () => setSidebarOpen(!sidebarOpen);
   const handleMobileClose = () => setMobileOpen(false);
 
   return (
-    <MainLayout
+    <BreadcrumbContext.Provider value={{ caseTitle, setCaseTitle }}>
+    <Box
       component={motion.div}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.2 }}
+      sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        bgcolor: colors.background,
+      }}
     >
       <DashboardSidebar
         open={sidebarOpen}
@@ -69,11 +87,19 @@ export const DashboardLayout = () => {
           userData={userData}
           userRol={userRol}
         />
-        <ContentArea>
-          <Outlet />
-        </ContentArea>
+        <Box
+          sx={{
+            flex: 1,
+            p: { xs: '16px', sm: '32px' },
+          }}
+        >
+          <PageContent pathname={location.pathname}>
+            <Outlet />
+          </PageContent>
+        </Box>
       </Box>
-    </MainLayout>
+    </Box>
+    </BreadcrumbContext.Provider>
   );
 };
 

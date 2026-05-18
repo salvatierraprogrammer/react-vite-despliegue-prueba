@@ -11,7 +11,7 @@ import { colors } from '../../theme/theme';
 import {
   Bell, User, Settings, CheckCheck, ArrowLeft,
   Mail, Briefcase, Clock, Eye, Star, AlertCircle,
-  Users, FileText, MessageCircle,
+  Users, FileText, MessageCircle, Trash2, X,
 } from 'lucide-react';
 
 const PageHeader = styled(Box)({
@@ -32,31 +32,31 @@ const NotificationCard = styled(Paper, { shouldForwardProp: (prop) => prop !== '
 
 const roleNotifications = {
   empleado: [
-    { id: 1, title: 'Nueva postulación recibida', description: 'Un reclutador ha mostrado interés en tu perfil. Revisa los detalles de la oportunidad.', time: 'Hace 5 min', icon: User, read: false },
-    { id: 2, title: 'Tu CV fue visto por un reclutador', description: 'El reclutador Carlos López ha visto tu perfil laboral.', time: 'Hace 1 hora', icon: Eye, read: false },
-    { id: 3, title: 'Perfil actualizado correctamente', description: 'Los cambios en tu perfil laboral han sido guardados.', time: 'Ayer', icon: Settings, read: true },
-    { id: 4, title: 'Nuevo caso disponible', description: 'Hay un nuevo caso de acompañamiento en tu zona.', time: 'Hace 2 días', icon: Briefcase, read: true },
-    { id: 5, title: 'Recordatorio: completa tu perfil', description: 'Tu perfil está incompleto. Agrega tu formación y experiencia para recibir más postulaciones.', time: 'Hace 3 días', icon: AlertCircle, read: true },
+    { id: 1, title: 'Nueva postulación recibida', description: 'Un reclutador ha mostrado interés en tu perfil. Revisa los detalles de la oportunidad.', time: 'Hace 5 min', icon: User, read: false, route: '/cvEnvidos' },
+    { id: 2, title: 'Tu CV fue visto por un reclutador', description: 'El reclutador Carlos López ha visto tu perfil laboral.', time: 'Hace 1 hora', icon: Eye, read: false, route: '/cvEnvidos' },
+    { id: 3, title: 'Perfil actualizado correctamente', description: 'Los cambios en tu perfil laboral han sido guardados.', time: 'Ayer', icon: Settings, read: true, route: '/miCuenta' },
+    { id: 4, title: 'Nuevo caso disponible', description: 'Hay un nuevo caso de acompañamiento en tu zona.', time: 'Hace 2 días', icon: Briefcase, read: true, route: '/buscar-trabajo' },
+    { id: 5, title: 'Recordatorio: completa tu perfil', description: 'Tu perfil está incompleto. Agrega tu formación y experiencia para recibir más postulaciones.', time: 'Hace 3 días', icon: AlertCircle, read: true, route: '/perfilLaboralUpdate' },
   ],
   reclutador: [
-    { id: 1, title: 'Nuevo postulante para tu caso', description: 'María González ha aplicado a tu caso de acompañamiento.', time: 'Hace 10 min', icon: User, read: false },
-    { id: 2, title: 'CV recibido de acompañante', description: 'Juan Pérez ha enviado su CV para tu publicación.', time: 'Hace 2 horas', icon: FileText, read: false },
-    { id: 3, title: 'Publicación actualizada', description: 'Tu caso ha sido actualizado y está visible para los AT.', time: 'Ayer', icon: Settings, read: true },
-    { id: 4, title: 'Nuevo AT disponible en tu zona', description: 'Un nuevo acompañante terapéutico se ha registrado en tu área.', time: 'Hace 2 días', icon: Users, read: true },
-    { id: 5, title: 'Recordatorio: revisa tus postulaciones', description: 'Tienes postulaciones pendientes por revisar.', time: 'Hace 4 días', icon: Bell, read: true },
+    { id: 1, title: 'Nuevo postulante para tu caso', description: 'María González ha aplicado a tu caso de acompañamiento.', time: 'Hace 10 min', icon: User, read: false, route: '/cv-recibido' },
+    { id: 2, title: 'CV recibido de acompañante', description: 'Juan Pérez ha enviado su CV para tu publicación.', time: 'Hace 2 horas', icon: FileText, read: false, route: '/cv-recibido' },
+    { id: 3, title: 'Publicación actualizada', description: 'Tu caso ha sido actualizado y está visible para los AT.', time: 'Ayer', icon: Settings, read: true, route: '/misPublicaciones' },
+    { id: 4, title: 'Nuevo AT disponible en tu zona', description: 'Un nuevo acompañante terapéutico se ha registrado en tu área.', time: 'Hace 2 días', icon: Users, read: true, route: '/at-registrados' },
+    { id: 5, title: 'Recordatorio: revisa tus postulaciones', description: 'Tienes postulaciones pendientes por revisar.', time: 'Hace 4 días', icon: Bell, read: true, route: '/cv-recibido' },
   ],
   administrador: [
-    { id: 1, title: 'Nuevo usuario registrado', description: 'Un nuevo usuario se ha registrado en la plataforma.', time: 'Hace 15 min', icon: User, read: false },
-    { id: 2, title: 'AT pendiente de verificación', description: 'Hay 3 acompañantes terapéuticos esperando verificación de documentos.', time: 'Hace 30 min', icon: Clock, read: false },
-    { id: 3, title: 'Reporte semanal disponible', description: 'El reporte de actividad semanal ya está disponible para descargar.', time: 'Ayer', icon: Settings, read: true },
-    { id: 4, title: 'Nuevo reclutador registrado', description: 'Una agencia de reclutamiento ha solicitado acceso a la plataforma.', time: 'Hace 2 días', icon: Briefcase, read: true },
-    { id: 5, title: 'Actualización del sistema', description: 'La plataforma ha sido actualizada con nuevas funcionalidades.', time: 'Hace 5 días', icon: Star, read: true },
+    { id: 1, title: 'Nuevo usuario registrado', description: 'Un nuevo usuario se ha registrado en la plataforma.', time: 'Hace 15 min', icon: User, read: false, route: '/usuarios-nuevos' },
+    { id: 2, title: 'AT pendiente de verificación', description: 'Hay 3 acompañantes terapéuticos esperando verificación de documentos.', time: 'Hace 30 min', icon: Clock, read: false, route: '/at-registrados' },
+    { id: 3, title: 'Reporte semanal disponible', description: 'El reporte de actividad semanal ya está disponible para descargar.', time: 'Ayer', icon: Settings, read: true, route: '/admin' },
+    { id: 4, title: 'Nuevo reclutador registrado', description: 'Una agencia de reclutamiento ha solicitado acceso a la plataforma.', time: 'Hace 2 días', icon: Briefcase, read: true, route: '/usuarios-nuevos' },
+    { id: 5, title: 'Actualización del sistema', description: 'La plataforma ha sido actualizada con nuevas funcionalidades.', time: 'Hace 5 días', icon: Star, read: true, route: '/admin' },
   ],
   familiar: [
-    { id: 1, title: 'Postulación a tu caso', description: 'Un acompañante ha aplicado al caso que publicaste.', time: 'Hace 20 min', icon: User, read: false },
-    { id: 2, title: 'Actualización de caso', description: 'El estado de tu caso ha sido actualizado.', time: 'Hace 1 día', icon: Settings, read: true },
-    { id: 3, title: 'Nuevos AT disponibles', description: 'Hay nuevos acompañantes disponibles en tu zona.', time: 'Hace 3 días', icon: Users, read: true },
-    { id: 4, title: 'Recordatorio: caso activo', description: 'Tu caso sigue activo. Revisa las postulaciones recibidas.', time: 'Hace 5 días', icon: Bell, read: true },
+    { id: 1, title: 'Postulación a tu caso', description: 'Un acompañante ha aplicado al caso que publicaste.', time: 'Hace 20 min', icon: User, read: false, route: '/dashboard' },
+    { id: 2, title: 'Actualización de caso', description: 'El estado de tu caso ha sido actualizado.', time: 'Hace 1 día', icon: Settings, read: true, route: '/dashboard' },
+    { id: 3, title: 'Nuevos AT disponibles', description: 'Hay nuevos acompañantes disponibles en tu zona.', time: 'Hace 3 días', icon: Users, read: true, route: '/buscar-acompanante' },
+    { id: 4, title: 'Recordatorio: caso activo', description: 'Tu caso sigue activo. Revisa las postulaciones recibidas.', time: 'Hace 5 días', icon: Bell, read: true, route: '/dashboard' },
   ],
 };
 
@@ -70,8 +70,13 @@ const VerNotificaciones = () => {
 
   const filteredNotifs = tabValue === 0 ? notifications : notifications.filter(n => tabValue === 1 ? !n.read : n.read);
 
-  const handleMarkRead = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const handleNotificationClick = (notif) => {
+    navigate(notif.route);
+    setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
+  };
+
+  const handleDelete = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
   const handleMarkAllRead = () => {
@@ -152,38 +157,61 @@ const VerNotificaciones = () => {
                 <NotificationCard
                   unread={!notif.read}
                   elevation={0}
-                  onClick={() => handleMarkRead(notif.id)}
                 >
-                  <Box sx={{ display: 'flex', gap: 2, p: 2.5, alignItems: 'flex-start' }}>
-                    <Box sx={{
-                      width: 40, height: 40, borderRadius: '12px', flexShrink: 0,
-                      bgcolor: !notif.read ? alpha(colors.primary, 0.1) : alpha(colors.textMuted, 0.06),
-                      color: !notif.read ? colors.primary : colors.textMuted,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <IconComp size={18} />
-                    </Box>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: !notif.read ? 600 : 500, color: colors.textPrimary }}>
-                          {notif.title}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: colors.textMuted, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                          {notif.time}
+                  <Box sx={{ display: 'flex', gap: 2, p: 2.5, alignItems: 'flex-start', position: 'relative' }}>
+                    <Box
+                      onClick={() => handleNotificationClick(notif)}
+                      sx={{ display: 'flex', gap: 2, flex: 1, minWidth: 0, cursor: 'pointer', alignItems: 'flex-start' }}
+                    >
+                      <Box sx={{
+                        width: 40, height: 40, borderRadius: '12px', flexShrink: 0,
+                        bgcolor: !notif.read ? alpha(colors.primary, 0.1) : alpha(colors.textMuted, 0.06),
+                        color: !notif.read ? colors.primary : colors.textMuted,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <IconComp size={18} />
+                      </Box>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: !notif.read ? 600 : 500, color: colors.textPrimary }}>
+                            {notif.title}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: colors.textMuted, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                            {notif.time}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ color: colors.textSecondary, mt: 0.25, lineHeight: 1.5 }}>
+                          {notif.description}
                         </Typography>
                       </Box>
-                      <Typography variant="body2" sx={{ color: colors.textSecondary, mt: 0.25, lineHeight: 1.5 }}>
-                        {notif.description}
-                      </Typography>
+                      {!notif.read && (
+                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: colors.primary, flexShrink: 0, mt: 0.5 }} />
+                      )}
+                      {notif.read && (
+                        <Tooltip title="Leída">
+                          <CheckCheck size={14} color={colors.textMuted} />
+                        </Tooltip>
+                      )}
                     </Box>
-                    {!notif.read && (
-                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: colors.primary, flexShrink: 0, mt: 0.5 }} />
-                    )}
-                    {notif.read && (
-                      <Tooltip title="Leída">
-                        <CheckCheck size={14} color={colors.textMuted} />
-                      </Tooltip>
-                    )}
+                    <IconButton
+                      onClick={() => handleDelete(notif.id)}
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        width: 28,
+                        height: 28,
+                        borderRadius: '8px',
+                        color: colors.textMuted,
+                        opacity: 0,
+                        transition: 'opacity 0.15s ease',
+                        '&:hover': { color: colors.danger, backgroundColor: alpha(colors.danger, 0.08) },
+                        '.MuiPaper-root:hover &': { opacity: 1 },
+                      }}
+                    >
+                      <X size={14} />
+                    </IconButton>
                   </Box>
                 </NotificationCard>
               </motion.div>

@@ -15,7 +15,7 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import {
   Eye, Trash2, ArrowLeft, Building2,
-  Clock, MessageSquare, Inbox
+  Clock, MessageSquare, Inbox, User
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
@@ -86,12 +86,12 @@ const CvRecibidos = () => {
           const userDoc = await getDoc(userDocRef);
           const userData = userDoc.data();
 
-          if (userData?.userRol === 'reclutador') {
+          if (userData?.userRol === 'reclutador' || userData?.userRol === 'administrador' || userData?.userRol === 'familiar') {
             const cvRecibidosCollection = collection(db, 'mailEnviadosPostulado');
             const querySnapshot = await getDocs(cvRecibidosCollection);
             const cvsData = querySnapshot.docs
               .map(doc => ({ id: doc.id, ...doc.data() }))
-              .filter(cv => cv.userIdReclutador === currentUserId);
+              .filter(cv => userData.userRol === 'administrador' || cv.userIdReclutador === currentUserId);
 
             const publicacionesCollection = collection(db, 'publicaciones');
             const publicacionesSnapshot = await getDocs(publicacionesCollection);
@@ -279,10 +279,16 @@ const CvRecibidos = () => {
                       <TableCell align="right" sx={{ pr: 3 }}>
                         <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
                           <IconButton
-                            onClick={(e) => { e.stopPropagation(); navigate(`/verCaso/${cv.userIdPublicacion}`); }}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/ver-caso/${cv.userIdPublicacion}`); }}
                             sx={{ width: 34, height: 34, bgcolor: alpha(colors.primary, 0.08), color: colors.primary, borderRadius: '10px', '&:hover': { bgcolor: alpha(colors.primary, 0.15) } }}
                           >
                             <Eye size={15} />
+                          </IconButton>
+                          <IconButton
+                            onClick={(e) => { e.stopPropagation(); navigate(`/perfil/${cv.userIdUsers || cv.mails?.[0]?.userIdUsers}`); }}
+                            sx={{ width: 34, height: 34, bgcolor: alpha(colors.secondary, 0.08), color: colors.secondary, borderRadius: '10px', '&:hover': { bgcolor: alpha(colors.secondary, 0.15) } }}
+                          >
+                            <User size={15} />
                           </IconButton>
                           <IconButton
                             onClick={(e) => { e.stopPropagation(); handleEliminarConfirmation(cv); }}

@@ -84,7 +84,7 @@ const Login = () => {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           const userRol = userData.userRol;
-          if (userRol === 'reclutador' || userRol === 'empleado' || userRol === 'administrador') {
+          if (userRol === 'reclutador' || userRol === 'empleado' || userRol === 'administrador' || userRol === 'familiar') {
             navigate('/dashboard');
           }
         }

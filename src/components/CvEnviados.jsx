@@ -127,7 +127,7 @@ const CvEnviados = () => {
                       <TableCell sx={{ color: '#504683' }}>{cv.NombreCliente}</TableCell>
                       <TableCell sx={{ color: '#504683' }}>{cv.estado}</TableCell>
                       <TableCell>
-                        <IconButton color="primary" component={Link} to={`/verCaso/${cv.userIdPublicacion}`} className="me-2">
+                        <IconButton color="primary" component={Link} to={`/ver-caso/${cv.userIdPublicacion}`} className="me-2">
                           <Visibility />
                         </IconButton>
                         <IconButton color="error" onClick={() => handleEliminarConfirmation(cv.id)}>

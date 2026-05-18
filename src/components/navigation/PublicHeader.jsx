@@ -183,34 +183,55 @@ export const PublicHeader = () => {
           {!isMobile && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               {isAuthenticated ? (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    p: 0.5,
-                    pr: 1.5,
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    '&:hover': { backgroundColor: alpha(colors.primary, 0.06) },
-                  }}
-                  onClick={handleMenuOpen}
-                >
-                  <Avatar
+                <>
+                  <Button
+                    onClick={() => navigate('/dashboard')}
+                    variant="contained"
                     sx={{
-                      width: 32,
-                      height: 32,
-                      border: `2px solid ${alpha(colors.primary, 0.12)}`,
-                      bgcolor: alpha(colors.primary, 0.08),
-                      color: colors.primary,
-                      fontWeight: 600,
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                      fontWeight: 700,
+                      px: 2.5,
+                      py: 0.75,
+                      borderRadius: '8px',
                       fontSize: '0.8125rem',
+                      boxShadow: `0 4px 14px ${alpha(colors.primary, 0.25)}`,
+                      '&:hover': {
+                        boxShadow: `0 6px 20px ${alpha(colors.primary, 0.35)}`,
+                      },
+                      transition: 'all 0.2s ease',
                     }}
                   >
-                    {userData?.email?.charAt(0).toUpperCase() || <Person sx={{ fontSize: 16 }} />}
-                  </Avatar>
-                  <KeyboardArrowDown sx={{ fontSize: 18, color: colors.textMuted, ml: 0.75 }} />
-                </Box>
+                    Ir al Panel
+                  </Button>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      p: 0.5,
+                      pr: 1.5,
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      '&:hover': { backgroundColor: alpha(colors.primary, 0.06) },
+                    }}
+                    onClick={handleMenuOpen}
+                  >
+                    <Avatar
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        border: `2px solid ${alpha(colors.primary, 0.12)}`,
+                        bgcolor: alpha(colors.primary, 0.08),
+                        color: colors.primary,
+                        fontWeight: 600,
+                        fontSize: '0.8125rem',
+                      }}
+                    >
+                      {userData?.email?.charAt(0).toUpperCase() || <Person sx={{ fontSize: 16 }} />}
+                    </Avatar>
+                    <KeyboardArrowDown sx={{ fontSize: 18, color: colors.textMuted, ml: 0.75 }} />
+                  </Box>
+                </>
               ) : (
                 <Stack direction="row" spacing={1.5}>
                   <Button
@@ -263,19 +284,22 @@ export const PublicHeader = () => {
           {isMobile && (
             <Stack direction="row" spacing={1} alignItems="center">
               {isAuthenticated ? (
-                <IconButton onClick={() => navigate('/miCuenta')} sx={{ p: 0 }}>
-                  <Avatar
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      border: `2px solid ${alpha(colors.primary, 0.12)}`,
-                      bgcolor: alpha(colors.primary, 0.08),
-                      color: colors.primary,
-                    }}
-                  >
-                    <Person sx={{ fontSize: 16 }} />
-                  </Avatar>
-                </IconButton>
+                <Button
+                  onClick={() => navigate('/dashboard')}
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    py: 0.5,
+                    px: 1.5,
+                    borderRadius: '8px',
+                    boxShadow: `0 4px 14px ${alpha(colors.primary, 0.25)}`,
+                  }}
+                >
+                  Ir al Panel
+                </Button>
               ) : (
                 <Button
                   component={Link}
@@ -330,13 +354,8 @@ export const PublicHeader = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${colors.border}` }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.8125rem' }}>Mi cuenta</Typography>
-          <Typography variant="caption" color={colors.textMuted} sx={{ fontSize: '0.75rem' }}>
-            {userData?.email || ''}
-          </Typography>
-        </Box>
         {[
+          { label: 'Ir al Panel', path: '/dashboard' },
           { label: 'Mi Cuenta', path: '/miCuenta' },
           { label: 'Mi Perfil', path: '/perfilLaboralUpdate' },
           { label: 'Mis Publicaciones', path: '/misPublicaciones' },
@@ -435,11 +454,23 @@ export const PublicHeader = () => {
           {isAuthenticated ? (
             <Stack spacing={1.5}>
               <Button
+                variant="contained"
+                fullWidth
+                onClick={() => handleNavigate('/dashboard')}
+                sx={{
+                  borderRadius: '8px', py: 1.25, fontWeight: 700, fontSize: '0.8125rem',
+                  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                  boxShadow: `0 4px 14px ${alpha(colors.primary, 0.25)}`,
+                }}
+                endIcon={<ChevronRight sx={{ fontSize: 18 }} />}
+              >
+                Ir al Panel
+              </Button>
+              <Button
                 variant="outlined"
                 fullWidth
                 onClick={() => handleNavigate('/miCuenta')}
                 sx={{ borderRadius: '8px', py: 1.25, fontWeight: 600, fontSize: '0.8125rem', borderColor: colors.border, color: colors.textPrimary }}
-                endIcon={<ChevronRight sx={{ fontSize: 18 }} />}
               >
                 Mi Cuenta
               </Button>

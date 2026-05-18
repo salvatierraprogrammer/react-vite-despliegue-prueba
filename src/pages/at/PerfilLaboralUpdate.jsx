@@ -13,6 +13,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfg/firebase';
 import { colors } from '../../theme/theme';
 import { LoadingPage } from '../../components/feedback/LoadingSpinner';
+import { useAuth } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import {
@@ -188,6 +189,7 @@ const CompletitudBar = ({ percentage }) => {
 };
 
 const PerfilLaboralUpdate = () => {
+  const { user, userRol } = useAuth();
   const [perfilData, setPerfilData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -195,6 +197,16 @@ const PerfilLaboralUpdate = () => {
   const [openSuccessModal, setOpenSuccessModal] = useState(false);
   const [showStats, setShowStats] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && userRol !== 'empleado' && userRol !== 'administrador') {
+      navigate('/miCuenta', { replace: true });
+    }
+  }, [user, userRol, navigate]);
+
+  if (user && userRol !== 'empleado' && userRol !== 'administrador') {
+    return <LoadingPage />;
+  }
 
   const fetchPerfilData = useCallback(async () => {
     try {

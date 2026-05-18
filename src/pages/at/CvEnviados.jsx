@@ -130,7 +130,7 @@ const EmptyState = ({ icon: Icon, title, description, action }) => (
 const CvEnviados = () => {
   const [cvs, setCvs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = useState('timeline');
   const [selectedCv, setSelectedCv] = useState(null);
   const navigate = useNavigate();
 
@@ -563,7 +563,7 @@ const CvEnviados = () => {
               <Button
                 variant="contained"
                 startIcon={<ExternalLink size={14} />}
-                onClick={() => navigate(`/verCaso/${selectedCv.userIdPublicacion}`)}
+                onClick={() => navigate(`/ver-caso/${selectedCv.userIdPublicacion}`)}
               >
                 Ver caso completo
               </Button>

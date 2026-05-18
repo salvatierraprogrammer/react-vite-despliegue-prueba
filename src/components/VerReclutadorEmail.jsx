@@ -178,7 +178,7 @@ const VerReclutadorEmail = () => {
                       variant="outlined"
                       size="small"
                       startIcon={<Eye size={14} />}
-                      onClick={() => navigate(`/showPerfil/${mail.userIdUsers}`)}
+                      onClick={() => navigate(`/perfil/${mail.userIdUsers}`)}
                       sx={{ color: colors.primary, borderColor: alpha(colors.primary, 0.3) }}
                     >
                       Ver Perfil

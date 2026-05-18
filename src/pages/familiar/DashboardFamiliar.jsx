@@ -1,300 +1,218 @@
-import React, { useEffect, useState, memo, useCallback } from 'react';
+import { useEffect, useState, memo, useCallback } from 'react';
 import {
-  Box, Grid, Typography, Paper, Avatar, Chip, Button,
-  TextField, InputAdornment, IconButton, Tabs, Tab,
-  Card, CardContent, CardActions, Dialog, DialogTitle,
-  DialogContent, DialogActions, Fab, Badge
+  Box, Grid, Typography, Paper, Avatar, Chip, Button, IconButton, Stack, Divider
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs, query, where, doc, addDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../firebaseConfg/firebase';
-import { auth } from '../../firebaseConfg/firebase';
 import { colors } from '../../theme/theme';
 import { useAuth } from '../../context/AuthContext';
 import { LoadingPage } from '../../components/feedback/LoadingSpinner';
 import {
-  Search, Filter, MapPin, Star, Calendar, Heart,
-  Plus, Send, Eye, MessageCircle, Clock, CheckCircle,
-  Briefcase, Home, ChevronRight, Phone,
-  Mail, User, Heart as HeartFilled, X, MapPinned,
-  SlidersHorizontal
+  Briefcase, MapPin, Eye, Clock, Search, Plus,
+  Users, MessageCircle, User, Home, ChevronRight,
+  FileText, Sparkles, ArrowRight, Star, Shield
 } from 'lucide-react';
 
-const SearchFilters = memo(({ filters, onChange }) => (
-  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3 }}>
-    {[
-      { label: 'Todos', value: 'todos' },
-      { label: 'Zona Norte', value: 'norte' },
-      { label: 'Zona Sur', value: 'sur' },
-      { label: 'CABA', value: 'caba' },
-      { label: 'Zona Oeste', value: 'oeste' },
-    ].map(zone => (
-      <Chip
-        key={zone.value}
-        label={zone.label}
-        onClick={() => onChange({ ...filters, zona: zone.value })}
-        variant={filters.zona === zone.value ? 'filled' : 'outlined'}
-        sx={{
-          bgcolor: filters.zona === zone.value ? colors.primary : 'transparent',
-          color: filters.zona === zone.value ? '#fff' : colors.textSecondary,
-        }}
-      />
-    ))}
-  </Box>
-));
-
-const AcompananteCard = memo(({ at, onView, onContact, onFavorite }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
-
-  return (
-    <Card
-      component={motion.div}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      elevation={0}
-      sx={{
-        borderRadius: '20px', border: `1px solid ${colors.border}`,
-        overflow: 'hidden', transition: 'all 0.2s ease',
-        '&:hover': {
-          borderColor: colors.primary,
-          boxShadow: `0 12px 32px ${alpha(colors.primary, 0.12)}`,
-          transform: 'translateY(-4px)',
-        },
-      }}
-    >
+const StatCard = memo(({ icon, title, value, color, subtitle }) => (
+  <Paper
+    component={motion.div}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    elevation={0}
+    sx={{
+      p: 3, borderRadius: '20px', border: `1px solid ${colors.border}`,
+      bgcolor: colors.surface, position: 'relative', overflow: 'hidden',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: `0 12px 32px -8px ${alpha(color, 0.15)}`,
+      },
+    }}
+  >
+    <Box sx={{
+      position: 'absolute', top: -20, right: -20, width: 80, height: 80,
+      borderRadius: '50%', background: `radial-gradient(circle, ${alpha(color, 0.15)} 0%, transparent 70%)`,
+    }} />
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
       <Box sx={{
-        height: 120,
-        background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-        position: 'relative',
+        width: 48, height: 48, borderRadius: '14px',
+        backgroundColor: alpha(color, 0.1), display: 'flex',
+        alignItems: 'center', justifyContent: 'center', color,
+        transition: 'transform 0.3s ease',
+        '&:hover': { transform: 'scale(1.05)' },
       }}>
-        <IconButton
-          onClick={() => setIsFavorite(!isFavorite)}
-          sx={{
-            position: 'absolute', top: 8, right: 8,
-            bgcolor: alpha('#fff', 0.9),
-            '&:hover': { bgcolor: '#fff' },
-          }}
-        >
-          {isFavorite ? <HeartFilled size={18} color={colors.danger} /> : <Heart size={18} />}
-        </IconButton>
+        {icon}
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: -6 }}>
-        <Avatar
-          src={at.images?.[0] || at.photo}
-          sx={{
-            width: 80, height: 80, border: `4px solid ${colors.surface}`,
-            boxShadow: `0 8px 24px ${alpha('#000', 0.15)}`,
-          }}
-        >
-          {at.nombreCompleto?.[0]}
-        </Avatar>
-      </Box>
-      <CardContent sx={{ textAlign: 'center', pt: 1 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-          {at.nombreCompleto}
-        </Typography>
-        <Typography variant="body2" sx={{ color: colors.textSecondary, mb: 2 }}>
-          {at.titulo || 'Acompañante Terapéutico'}
-        </Typography>
-
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 2 }}>
-          {at.verificado && (
-            <Chip
-              icon={<CheckCircle size={12} />}
-              label="Verificado"
-              size="small"
-              sx={{ bgcolor: alpha(colors.success, 0.1), color: colors.success, fontSize: '0.7rem' }}
-            />
-          )}
-          <Chip
-            icon={<Star size={12} />}
-            label={at.calificacion || '4.8'}
-            size="small"
-            sx={{ bgcolor: alpha(colors.warning, 0.1), color: colors.warning, fontSize: '0.7rem' }}
-          />
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2 }}>
-          <MapPin size={14} color={colors.textMuted} />
-          <Typography variant="caption" sx={{ color: colors.textSecondary }}>
-            {at.localidad || at.zona || 'Buenos Aires'}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          {at.especialidades?.slice(0, 3).map((esp, i) => (
-            <Chip key={i} label={esp} size="small" sx={{ fontSize: '0.65rem' }} />
-          ))}
-        </Box>
-      </CardContent>
-
-      <CardActions sx={{ px: 2, pb: 2, justifyContent: 'center', gap: 1 }}>
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<Eye size={14} />}
-          onClick={() => onView(at.id)}
-        >
-          Ver perfil
-        </Button>
-        <Button
-          size="small"
-          variant="contained"
-          startIcon={<MessageCircle size={14} />}
-          onClick={() => onContact(at)}
-        >
-          Contactar
-        </Button>
-      </CardActions>
-    </Card>
-  );
-});
+      {subtitle && (
+        <Chip label={subtitle} size="small" sx={{ bgcolor: alpha(color, 0.1), color, fontSize: '0.7rem', fontWeight: 600 }} />
+      )}
+    </Box>
+    <Typography variant="h3" sx={{ fontWeight: 800, mb: 0.5, fontFamily: '"Plus Jakarta Sans", sans-serif', letterSpacing: '-0.03em' }}>{value}</Typography>
+    <Typography variant="body2" sx={{ color: colors.textSecondary, fontWeight: 500 }}>{title}</Typography>
+  </Paper>
+));
 
 const CasoCard = memo(({ caso, onView }) => (
   <Paper
     elevation={0}
     component={motion.div}
-    initial={{ opacity: 0, x: -10 }}
-    animate={{ opacity: 1, x: 0 }}
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
     sx={{
-      p: 3, borderRadius: '16px', border: `1px solid ${colors.border}`,
+      p: { xs: 2, sm: 3 }, borderRadius: '16px', border: `1px solid ${colors.border}`,
       bgcolor: colors.surface, cursor: 'pointer', transition: 'all 0.2s ease',
-      '&:hover': { borderColor: colors.primary, transform: 'translateX(4px)' },
+      '&:hover': {
+        borderColor: colors.primary, transform: 'translateY(-2px)',
+        boxShadow: `0 8px 24px -6px ${alpha(colors.primary, 0.1)}`,
+      },
     }}
-    onClick={() => onView(caso.id)}
+    onClick={() => onView(caso)}
   >
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-        {caso.titulo}
-      </Typography>
-      <Chip
-        label={caso.estado || 'abierto'}
-        size="small"
-        sx={{
-          bgcolor: caso.estado === 'cerrado' ? alpha(colors.success, 0.1) : alpha(colors.warning, 0.1),
-          color: caso.estado === 'cerrado' ? colors.success : colors.warning,
-        }}
-      />
-    </Box>
-    <Box sx={{ display: 'flex', gap: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        <MapPin size={14} color={colors.textMuted} />
-        <Typography variant="caption">{caso.localidad}</Typography>
-      </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        <Clock size={14} color={colors.textMuted} />
-        <Typography variant="caption">
-          {caso.fechaPublicacion ? new Date(caso.fechaPublicacion.seconds * 1000).toLocaleDateString() : 'Reciente'}
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+      <Box sx={{ flex: 1 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.75, fontSize: { xs: '0.875rem', sm: '1rem' }, fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+          {caso.paciente || caso.titulo || 'Sin nombre'}
         </Typography>
+        {caso.codigo && (
+          <Chip
+            label={caso.codigo}
+            size="small"
+            sx={{ height: 20, fontSize: '0.625rem', fontWeight: 700, borderRadius: '4px', bgcolor: alpha(colors.primary, 0.08), color: colors.primary, mb: 1, letterSpacing: '0.04em' }}
+          />
+        )}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <MapPin size={13} color={colors.textMuted} />
+          <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: '0.8125rem' }}>{caso.localidad || caso.zona || 'Sin ubicación'}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Chip
+            label={caso.estado === 'Disponible' ? 'Abierto' : caso.estado || 'Abierto'}
+            size="small"
+            sx={{
+              height: 22, fontSize: '0.6875rem', fontWeight: 600,
+              bgcolor: alpha(caso.estado === 'Disponible' ? colors.success : colors.warning, 0.1),
+              color: caso.estado === 'Disponible' ? colors.success : colors.warning,
+            }}
+          />
+          {(caso.fechaPublicacion || caso.fechaCreacion) && (
+            <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.6875rem' }}>
+              {(() => {
+                const ts = caso.fechaPublicacion || caso.fechaCreacion;
+                const d = ts?.toDate ? ts.toDate() : ts instanceof Date ? ts : new Date(ts?.seconds ? ts.seconds * 1000 : ts);
+                return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+              })()}
+            </Typography>
+          )}
+        </Box>
       </Box>
+      <IconButton size="small" sx={{ color: colors.textMuted, alignSelf: 'center', '&:hover': { color: colors.primary, bgcolor: alpha(colors.primary, 0.06) } }}>
+        <ChevronRight size={18} />
+      </IconButton>
     </Box>
+    {caso.descripcion && (
+      <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: '0.75rem', lineHeight: 1.5 }} noWrap>
+        {caso.descripcion}
+      </Typography>
+    )}
   </Paper>
 ));
 
-const PublicarCasoDialog = ({ open, onClose, onSubmit }) => {
-  const [formData, setFormData] = useState({
-    titulo: '', descripcion: '', localidad: '', zona: '', urgencia: 'media',
-  });
+const AcompananteMiniCard = memo(({ at, onView, onContact }) => (
+  <Paper
+    elevation={0}
+    sx={{
+      p: { xs: 1.5, sm: 2.5 }, borderRadius: '16px', border: `1px solid ${colors.border}`,
+      bgcolor: colors.surface, display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 },
+      cursor: 'pointer', transition: 'all 0.2s ease',
+      '&:hover': {
+        borderColor: colors.primary, bgcolor: alpha(colors.primary, 0.02),
+        transform: 'translateY(-1px)',
+        boxShadow: `0 4px 16px -4px ${alpha(colors.primary, 0.08)}`,
+      },
+    }}
+    onClick={() => onView(at)}
+  >
+    <Avatar
+      src={typeof at.images === 'string' ? at.images : at.images?.[0] || at.photo}
+      sx={{
+        width: { xs: 36, sm: 44 }, height: { xs: 36, sm: 44 },
+        fontSize: { xs: '0.8125rem', sm: '1rem' },
+        bgcolor: alpha(colors.primary, 0.1), color: colors.primary,
+        border: `2px solid ${alpha(colors.primary, 0.1)}`,
+      }}
+    >
+      {at.nombreCompleto?.[0]}
+    </Avatar>
+    <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Typography variant="body2" sx={{ fontWeight: 600, fontSize: { xs: '0.8125rem', sm: '0.875rem' }, fontFamily: '"Plus Jakarta Sans", sans-serif' }} noWrap>
+        {at.nombreCompleto || 'Sin nombre'}
+      </Typography>
+      <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.6875rem', display: 'block' }}>
+        {at.titulo || 'Acompañante Terapéutico'}
+      </Typography>
+      <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.625rem' }}>
+        {at.zona || at.localidad || 'Sin ubicación'}
+      </Typography>
+    </Box>
+    {at.telefono && (
+      <IconButton
+        size="small"
+        onClick={(e) => { e.stopPropagation(); onContact(at); }}
+        sx={{
+          color: '#25D366', bgcolor: alpha('#25D366', 0.1), width: 32, height: 32,
+          '&:hover': { bgcolor: alpha('#25D366', 0.2) },
+        }}
+      >
+        <MessageCircle size={14} />
+      </IconButton>
+    )}
+  </Paper>
+));
 
-  const handleSubmit = () => {
-    if (formData.titulo && formData.descripcion) {
-      onSubmit(formData);
-      setFormData({ titulo: '', descripcion: '', localidad: '', zona: '', urgencia: 'media' });
-      onClose();
-    }
-  };
+function formatWhatsAppNumber(phone) {
+  const clean = (phone || '').replace(/\D/g, '');
+  if (clean.startsWith('549')) return clean;
+  if (clean.startsWith('54')) return '549' + clean.slice(2);
+  if (clean.startsWith('0')) return '549' + clean.slice(1);
+  return '549' + clean;
+}
 
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
-      <DialogTitle sx={{ fontWeight: 600 }}>Publicar un Caso</DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          <TextField
-            label="Título del caso"
-            fullWidth
-            value={formData.titulo}
-            onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-            placeholder="Ej: Se busca AT para niño con TEA"
-          />
-          <TextField
-            label="Descripción"
-            fullWidth
-            multiline
-            rows={4}
-            value={formData.descripcion}
-            onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-            placeholder="Describe las necesidades, horarios, requisitos..."
-          />
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField
-              label="Localidad"
-              fullWidth
-              value={formData.localidad}
-              onChange={(e) => setFormData({ ...formData, localidad: e.target.value })}
-            />
-            <TextField
-              label="Zona"
-              fullWidth
-              select
-              value={formData.zona}
-              onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
-            >
-              {['CABA', 'Zona Norte', 'Zona Sur', 'Zona Oeste', 'Zona Este'].map(z => (
-                <MenuItem key={z} value={z}>{z}</MenuItem>
-              ))}
-            </TextField>
-          </Box>
-          <TextField
-            label="Nivel de urgencia"
-            fullWidth
-            select
-            value={formData.urgencia}
-            onChange={(e) => setFormData({ ...formData, urgencia: e.target.value })}
-          >
-            <MenuItem value="baja">Baja</MenuItem>
-            <MenuItem value="media">Media</MenuItem>
-            <MenuItem value="alta">Alta</MenuItem>
-          </TextField>
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} variant="outlined">Cancelar</Button>
-        <Button onClick={handleSubmit} variant="contained">Publicar Caso</Button>
-      </DialogActions>
-    </Dialog>
-  );
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 },
+  },
 };
 
 const DashboardFamiliar = () => {
-  const { user, userData } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [acompanantes, setAcompanantes] = useState([]);
   const [misCasos, setMisCasos] = useState([]);
-  const [tabValue, setTabValue] = useState(0);
-  const [filters, setFilters] = useState({ zona: 'todos', search: '' });
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [acompanantes, setAcompanantes] = useState([]);
 
   const fetchData = useCallback(async () => {
     try {
-      const atSnap = await getDocs(collection(db, 'perfilesLaborales'));
+      const casosSnap = await getDocs(query(
+        collection(db, 'publicaciones'),
+        where('userId', '==', user?.uid)
+      ));
+      const casosData = casosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => {
+          const aTime = a.fechaPublicacion?.seconds || a.fechaCreacion?.seconds || 0;
+          const bTime = b.fechaPublicacion?.seconds || b.fechaCreacion?.seconds || 0;
+          return bTime - aTime;
+        });
+
+      const atSnap = await getDocs(collection(db, 'perfilLaboral'));
       const atData = atSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      let casosSnap;
-      if (user) {
-        casosSnap = await getDocs(query(
-          collection(db, 'publicaciones'),
-          where('userId', '==', user.uid)
-        ));
-      } else {
-        casosSnap = await getDocs(collection(db, 'publicaciones'));
-      }
-      const casosData = casosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      setAcompanantes(atData);
       setMisCasos(casosData);
+      setAcompanantes(atData.filter(a => a.estado === 'Disponible' || !a.estado));
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -306,121 +224,189 @@ const DashboardFamiliar = () => {
     fetchData();
   }, [fetchData]);
 
-  const handlePublishCaso = async (data) => {
-    try {
-      await addDoc(collection(db, 'publicaciones'), {
-        ...data,
-        userId: user?.uid,
-        userNombre: userData?.nombre,
-        estado: 'abierta',
-        fechaPublicacion: new Date(),
-      });
-      fetchData();
-    } catch (error) {
-      console.error('Error:', error);
-    }
+  const stats = {
+    totalCasos: misCasos.length,
+    activos: misCasos.filter(c => c.estado === 'Disponible' || c.estado === 'abierta').length,
+    atsDisponibles: acompanantes.length,
+    vistas: misCasos.reduce((acc, c) => acc + (c.vistas || 0), 0),
   };
 
   if (loading) return <LoadingPage />;
 
-  const filteredAt = acompanantes.filter(at => {
-    if (filters.zona !== 'todos' && at.zona !== filters.zona) return false;
-    if (filters.search && !at.nombreCompleto?.toLowerCase().includes(filters.search.toLowerCase())) return false;
-    return true;
-  });
-
   return (
-    <Box component={motion.div} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+    <Box component={motion.div} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} variants={containerVariants}>
+      {/* Header */}
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, fontFamily: '"Plus Jakarta Sans", sans-serif', letterSpacing: '-0.02em', mb: 0.5 }}>
             Panel Familiar
           </Typography>
-          <Typography variant="body1" sx={{ color: colors.textSecondary }}>
+          <Typography variant="body1" sx={{ color: colors.textSecondary, fontWeight: 500 }}>
             Encuentra el mejor acompañante terapéutico
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<Plus size={16} />} onClick={() => setDialogOpen(true)}>
-          Publicar Caso
-        </Button>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<Search size={15} />}
+            onClick={() => navigate('/buscar-acompanante')}
+            sx={{ borderRadius: '10px', fontWeight: 600, fontSize: '0.8125rem' }}
+          >
+            Buscar AT
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<User size={15} />}
+            onClick={() => navigate('/miCuenta')}
+            sx={{ borderRadius: '10px', fontWeight: 600, fontSize: '0.8125rem' }}
+          >
+            Mi Perfil
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<Plus size={15} />}
+            onClick={() => navigate('/nuevaPublicacion')}
+            disableElevation
+            sx={{ borderRadius: '10px', fontWeight: 600, fontSize: '0.8125rem', boxShadow: `0 4px 12px ${alpha(colors.primary, 0.2)}` }}
+          >
+            Publicar Caso
+          </Button>
+        </Stack>
       </Box>
 
-      <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} sx={{ mb: 3 }}>
-        <Tab label={`Buscar AT (${acompanantes.length})`} />
-        <Tab label={`Mis Casos (${misCasos.length})`} />
-      </Tabs>
+      {/* Stats */}
+      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+        <Grid item xs={6} md={3}>
+          <StatCard icon={<Briefcase size={20} />} title="Casos publicados" value={stats.totalCasos} color={colors.primary} />
+        </Grid>
+        <Grid item xs={6} md={3}>
+          <StatCard icon={<Clock size={20} />} title="Casos activos" value={stats.activos} color={colors.success} />
+        </Grid>
+        <Grid item xs={6} md={3}>
+          <StatCard icon={<Users size={20} />} title="ATs disponibles" value={stats.atsDisponibles} color={colors.warning} />
+        </Grid>
+        <Grid item xs={6} md={3}>
+          <StatCard icon={<Eye size={20} />} title="Vistas totales" value={stats.vistas} color={colors.secondary} />
+        </Grid>
+      </Grid>
 
-      <AnimatePresence mode="wait">
-        {tabValue === 0 && (
-          <motion.div key="tab0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <SearchFilters filters={filters} onChange={setFilters} />
-
-            <Box sx={{ mb: 3 }}>
-              <TextField
-                fullWidth
-                placeholder="Buscar por nombre o especialidad..."
-                value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search size={20} color={colors.textMuted} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ maxWidth: 500 }}
-              />
-            </Box>
-
-            <Grid container spacing={3}>
-              {filteredAt.map(at => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={at.id}>
-                  <AcompananteCard
-                    at={at}
-                    onView={(id) => navigate(`/showPerfil/${id}`)}
-                    onContact={() => window.open(`https://wa.me/${at.telefono}`, '_blank')}
-                    onFavorite={(id) => console.log('favorite', id)}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-
-            {filteredAt.length === 0 && (
-              <Box sx={{ textAlign: 'center', py: 6 }}>
-                <Search size={48} color={colors.textMuted} />
-                <Typography variant="h6" sx={{ mt: 2 }}>No se encontraron acompañantes</Typography>
-                <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-                  Intenta cambiar los filtros de búsqueda
+      {/* Main content */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} lg={8}>
+          <Paper elevation={0} sx={{ borderRadius: '20px', border: `1px solid ${colors.border}`, overflow: 'hidden' }}>
+            <Box sx={{ p: { xs: 2, sm: 3 }, borderBottom: `1px solid ${colors.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: 32, height: 32, borderRadius: '8px', bgcolor: alpha(colors.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FileText size={16} color={colors.primary} />
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '0.9375rem', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                  Mis Casos
                 </Typography>
               </Box>
-            )}
-          </motion.div>
-        )}
-
-        {tabValue === 1 && (
-          <motion.div key="tab1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Grid container spacing={3}>
-              {misCasos.map(caso => (
-                <Grid item xs={12} md={6} key={caso.id}>
-                  <CasoCard caso={caso} onView={(id) => navigate(`/verCaso/${id}`)} />
-                </Grid>
-              ))}
-            </Grid>
-
-            {misCasos.length === 0 && (
-              <Box sx={{ textAlign: 'center', py: 6 }}>
-                <Briefcase size={48} color={colors.textMuted} />
-                <Typography variant="h6" sx={{ mt: 2 }}>No has publicado casos aún</Typography>
-                <Button variant="text" onClick={() => setDialogOpen(true)} sx={{ mt: 1 }}>
-                  Publicar tu primer caso
+              {misCasos.length > 0 && (
+                <Button
+                  size="small"
+                  endIcon={<ArrowRight size={14} />}
+                  onClick={() => navigate('/misPublicaciones')}
+                  sx={{ fontWeight: 600, fontSize: '0.75rem', borderRadius: '8px' }}
+                >
+                  Ver todos
                 </Button>
-              </Box>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+              )}
+            </Box>
+            <Box sx={{ p: { xs: 2, sm: 3 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {misCasos.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <Box sx={{ width: 64, height: 64, borderRadius: '20px', bgcolor: alpha(colors.primary, 0.06), display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2.5 }}>
+                    <Home size={28} color={alpha(colors.primary, 0.3)} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: colors.textPrimary, mb: 0.5, fontSize: '0.9375rem' }}>
+                    No has publicado casos aún
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: colors.textSecondary, mb: 2.5, maxWidth: 300, mx: 'auto', fontSize: '0.8125rem' }}>
+                    Publicá tu primer caso y empezá a encontrar al acompañante ideal para tu familiar
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<Sparkles size={16} />}
+                    onClick={() => navigate('/nuevaPublicacion')}
+                    disableElevation
+                    sx={{ borderRadius: '10px', fontWeight: 600, fontSize: '0.8125rem' }}
+                  >
+                    Publicar primer caso
+                  </Button>
+                </Box>
+              ) : (
+                misCasos.slice(0, 4).map(caso => (
+                  <CasoCard
+                    key={caso.id}
+                    caso={caso}
+                    onView={(c) => navigate(c.slug ? `/ver-caso/${c.slug}` : `/ver-caso/${c.id}`)}
+                  />
+                ))
+              )}
+            </Box>
+          </Paper>
+        </Grid>
 
-      <PublicarCasoDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onSubmit={handlePublishCaso} />
+        <Grid item xs={12} lg={4}>
+          <Paper elevation={0} sx={{ borderRadius: '20px', border: `1px solid ${colors.border}`, overflow: 'hidden' }}>
+            <Box sx={{ p: { xs: 2, sm: 3 }, borderBottom: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ width: 32, height: 32, borderRadius: '8px', bgcolor: alpha(colors.success, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Shield size={16} color={colors.success} />
+              </Box>
+              <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '0.9375rem', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                Acompañantes
+              </Typography>
+              {acompanantes.length > 0 && (
+                <Chip label={acompanantes.length} size="small" sx={{ height: 20, fontSize: '0.625rem', fontWeight: 700, bgcolor: alpha(colors.success, 0.1), color: colors.success }} />
+              )}
+            </Box>
+            <Box sx={{ p: { xs: 2, sm: 3 }, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              {acompanantes.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <Box sx={{ width: 64, height: 64, borderRadius: '20px', bgcolor: alpha(colors.warning, 0.06), display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2.5 }}>
+                    <Users size={28} color={alpha(colors.warning, 0.3)} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: colors.textPrimary, mb: 0.5, fontSize: '0.9375rem' }}>
+                    Sin acompañantes
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: '0.75rem', maxWidth: 260, mx: 'auto' }}>
+                    No hay acompañantes registrados aún. Volvé pronto.
+                  </Typography>
+                </Box>
+              ) : (
+                acompanantes.slice(0, 5).map(at => (
+                  <AcompananteMiniCard
+                    key={at.id}
+                    at={at}
+                    onView={(a) => navigate(`/perfil/${a.slug || a.id}`)}
+                    onContact={(a) => {
+                      const waUrl = a.telefono ? `https://wa.me/${formatWhatsAppNumber(a.telefono)}?text=${encodeURIComponent('¡Hola! 👋 Vi tu perfil en El Canal del AT. Me interesa tu perfil profesional. ¿Podemos coordinar? 😊')}` : '';
+                      if (waUrl) window.open(waUrl, '_blank');
+                    }}
+                  />
+                ))
+              )}
+              {acompanantes.length > 5 && (
+                <Box sx={{ textAlign: 'center', pt: 1 }}>
+                  <Button
+                    size="small"
+                    endIcon={<ArrowRight size={14} />}
+                    onClick={() => navigate('/buscar-acompanante')}
+                    sx={{ fontWeight: 600, fontSize: '0.75rem' }}
+                  >
+                    Ver {acompanantes.length - 5} más
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

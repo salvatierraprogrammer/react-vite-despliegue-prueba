@@ -13,13 +13,15 @@ import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, getDoc, query, where, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { signOut, updatePassword, deleteUser } from 'firebase/auth';
 import { auth, db } from '../../firebaseConfg/firebase';
+import { generarSlugCompleto, generarShortId } from '../../utils/slugUtils';
 import { colors } from '../../theme/theme';
 import { useAuth } from '../../context/AuthContext';
 import { LoadingPage } from '../../components/feedback/LoadingSpinner';
+import EnviarCV from '../../components/EnviarCV';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import {
-  User, Briefcase, Send, Eye, Star, MapPin, Calendar, Clock,
+  User, Briefcase,   Send, Eye, Star, MapPin, FileText, Calendar, Clock,
   CheckCircle, XCircle, Edit, EyeOff, TrendingUp,
   MessageCircle, Phone, Mail, Heart, Award, Globe,
   ChevronRight, Plus, Sparkles, LogOut, Shield, Users,
@@ -64,109 +66,257 @@ const StatCard = memo(({ icon, title, value, color, subtitle }) => (
   </Paper>
 ));
 
+const zonaColors = {
+  'CABA': { color: '#6C4CF1', bg: alpha('#6C4CF1', 0.08), border: alpha('#6C4CF1', 0.15) },
+  'Zona Norte': { color: '#10B981', bg: alpha('#10B981', 0.08), border: alpha('#10B981', 0.15) },
+  'Zona Sur': { color: '#F59E0B', bg: alpha('#F59E0B', 0.08), border: alpha('#F59E0B', 0.15) },
+  'Zona Oeste': { color: '#8B5CF6', bg: alpha('#8B5CF6', 0.08), border: alpha('#8B5CF6', 0.15) },
+};
+
+const getTimeAgo = (timestamp) => {
+  if (!timestamp) return '';
+  const date = timestamp?.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
+  const diffMs = Date.now() - date;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'Ahora';
+  if (mins < 60) return `Hace ${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `Hace ${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `Hace ${days}d`;
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+};
+
+const InfoBadge = ({ icon, label }) => (
+  <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+    <Box sx={{
+      width: 24, height: 24, borderRadius: '6px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      bgcolor: alpha(colors.primary, 0.06), flexShrink: 0,
+    }}>
+      {icon}
+    </Box>
+    <Typography variant="body2" sx={{
+      color: colors.textSecondary, fontSize: '0.8125rem',
+      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+    }}>
+      {label}
+    </Typography>
+  </Stack>
+);
+
 const CaseCard = memo(({ pub, sentCvs, onApply, onVerCaso }) => {
   const hasSent = sentCvs.includes(pub.id);
-  
+  const zoneStyle = zonaColors[pub.zona] || { color: '#6C4CF1', bg: alpha('#6C4CF1', 0.08), border: alpha('#6C4CF1', 0.15) };
+  const timeAgo = getTimeAgo(pub.fechaCreacion);
+
   return (
     <Card
       component={motion.div}
-      initial={{ opacity: 0, y: 20 }}
+      layout
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
       elevation={0}
       sx={{
-        borderRadius: '20px', border: `1px solid ${colors.border}`,
-        overflow: 'hidden', transition: 'all 0.2s ease',
+        borderRadius: '16px',
+        border: `1px solid ${colors.border}`,
+        bgcolor: colors.surface,
+        position: 'relative',
+        overflow: 'visible',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
-          borderColor: colors.primary,
-          boxShadow: `0 12px 32px ${alpha(colors.primary, 0.1)}`,
-          transform: 'translateY(-2px)',
+          borderColor: zoneStyle.color,
+          transform: 'translateY(-3px)',
+          boxShadow: `0 16px 32px -8px ${alpha(zoneStyle.color, 0.12)}`,
+          '& .card-zone-bar': { opacity: 1 },
         },
       }}
     >
-      <Box sx={{
-        p: 3, borderBottom: `1px solid ${colors.border}`,
-        bgcolor: alpha(colors.primary, 0.02),
-      }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-              {pub.titulo}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <Building2 size={14} color={colors.textMuted} />
-              <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-                {pub.reclutadorNombre || 'Reclutador'}
+      <Box className="card-zone-bar" sx={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+        bgcolor: zoneStyle.color, opacity: 0,
+        transition: 'opacity 0.3s ease',
+        borderTopLeftRadius: '16px', borderTopRightRadius: '16px',
+      }} />
+
+      <CardContent sx={{ p: 2.5, '&:last-child': { pb: 1.5 } }}>
+        <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
+          <Avatar
+            src={pub.photo}
+            sx={{
+              width: 44, height: 44,
+              border: `2px solid ${alpha(zoneStyle.color, 0.2)}`,
+              fontSize: '1rem', fontWeight: 700,
+              flexShrink: 0,
+            }}
+          >
+            {pub.cliente?.[0]}
+          </Avatar>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.25 }}>
+              <Typography sx={{
+                fontWeight: 700, fontSize: '0.9375rem', lineHeight: 1.3,
+                color: colors.textPrimary, overflow: 'hidden',
+                textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {pub.cliente || pub.titulo}
               </Typography>
-            </Box>
+              <Box sx={{
+                width: 4, height: 4, borderRadius: '50%',
+                bgcolor: colors.textMuted, flexShrink: 0,
+              }} />
+              <Typography sx={{
+                color: colors.textMuted, fontSize: '0.75rem',
+                fontWeight: 450, whiteSpace: 'nowrap', flexShrink: 0,
+              }}>
+                {timeAgo}
+              </Typography>
+            </Stack>
+            <Typography sx={{
+              color: colors.textMuted, fontSize: '0.8125rem',
+              fontWeight: 450,
+            }}>
+              {pub.edad ? `${pub.edad} a\u00f1os \u2022 ${pub.sexo}` : pub.reclutadorNombre || ''}
+            </Typography>
           </Box>
           <Chip
-            label={pub.estado || 'Activa'}
+            label={pub.zona || pub.estado || 'Activa'}
             size="small"
-            sx={{ bgcolor: alpha(colors.success, 0.1), color: colors.success }}
+            sx={{
+              bgcolor: zoneStyle.bg,
+              color: zoneStyle.color,
+              fontWeight: 600,
+              fontSize: '0.6875rem',
+              height: 24,
+              borderRadius: '6px',
+              border: `1px solid ${zoneStyle.border}`,
+              flexShrink: 0,
+              mt: 0.25,
+              '& .MuiChip-label': { px: 0.75 },
+            }}
           />
-        </Box>
-      </Box>
-      <CardContent>
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <MapPin size={14} color={colors.textMuted} />
-            <Typography variant="body2">{pub.localidad}</Typography>
-          </Box>
-          {pub.zona && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <MapPinned size={14} color={colors.textMuted} />
-              <Typography variant="body2">{pub.zona}</Typography>
-            </Box>
+        </Stack>
+
+        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
+          <InfoBadge icon={<MapPinned size={12} color={colors.textSecondary} />} label={pub.localidad} />
+          {pub.diagnostico && (
+            <InfoBadge icon={<FileText size={12} color={colors.textSecondary} />} label={pub.diagnostico} />
           )}
-        </Box>
+          {pub.horario && (
+            <InfoBadge icon={<Clock size={12} color={colors.textSecondary} />} label={pub.horario} />
+          )}
+          {pub.remuneracion && (
+            <InfoBadge icon={<TrendingUp size={12} color={colors.success} />} label={pub.remuneracion} />
+          )}
+        </Stack>
 
-        <Typography variant="body2" sx={{ color: colors.textSecondary, mb: 2 }} noWrap>
-          {pub.descripcion}
-        </Typography>
-
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-          {pub.etiquetas?.map((tag, i) => (
-            <Chip key={i} label={tag} size="small" sx={{ fontSize: '0.7rem' }} />
-          ))}
-        </Box>
-
-        {pub.horario && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <Clock size={14} color={colors.textMuted} />
-            <Typography variant="caption" sx={{ color: colors.textSecondary }}>
-              {pub.horario}
-            </Typography>
-          </Box>
+        {pub.descripcion && (
+          <Typography sx={{
+            color: colors.textSecondary,
+            fontSize: '0.8125rem',
+            lineHeight: 1.6,
+            mb: 1.5,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>
+            {pub.descripcion}
+          </Typography>
         )}
 
-        {pub.remuneracion && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TrendingUp size={14} color={colors.success} />
-            <Typography variant="body2" sx={{ fontWeight: 600, color: colors.success }}>
-              {pub.remuneracion}
-            </Typography>
-          </Box>
+        {pub.etiquetas?.length > 0 && (
+          <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: 0.5 }}>
+            {pub.etiquetas.map((tag, i) => (
+              <Chip
+                key={i}
+                label={tag}
+                size="small"
+                sx={{
+                  fontSize: '0.6875rem',
+                  fontWeight: 500,
+                  height: 22,
+                  borderRadius: '4px',
+                  bgcolor: alpha(colors.primary, 0.04),
+                  color: colors.textMuted,
+                  border: `1px solid ${alpha(colors.border, 0.5)}`,
+                  '& .MuiChip-label': { px: 0.75 },
+                }}
+              />
+            ))}
+          </Stack>
         )}
       </CardContent>
-      <CardActions sx={{ px: 2, pb: 2, justifyContent: 'space-between' }}>
-        <Button size="small" startIcon={<Eye size={14} />} onClick={() => onVerCaso(pub)}>
-          Ver caso
-        </Button>
-        <Tooltip title={hasSent ? 'CV ya enviado' : 'Enviar CV'}>
-          <span>
+
+      <Divider sx={{ mx: 2.5, borderColor: alpha(colors.border, 0.5) }} />
+
+      <Box sx={{ px: 2.5, py: 1.5 }}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<Eye size={15} />}
+            onClick={() => onVerCaso(pub)}
+            sx={{
+              color: colors.textMuted,
+              fontWeight: 500,
+              fontSize: '0.8125rem',
+              borderRadius: '8px',
+              px: 1.5,
+              minHeight: 34,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: alpha(colors.primary, 0.06),
+                color: colors.primary,
+              },
+            }}
+          >
+            Ver detalle
+          </Button>
+
+          <Box sx={{ flex: 1 }} />
+
+          {hasSent ? (
+            <Box sx={{
+              display: 'flex', alignItems: 'center', gap: 0.5,
+              px: 1.5, py: 0.625, borderRadius: '8px',
+              bgcolor: alpha('#10B981', 0.08),
+              border: `1px solid ${alpha('#10B981', 0.2)}`,
+            }}>
+              <CheckCircle size={14} color="#10B981" />
+              <Typography sx={{ fontWeight: 600, color: '#10B981', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                Postulado
+              </Typography>
+            </Box>
+          ) : (
             <Button
+              variant="contained"
               size="small"
-              variant={hasSent ? 'outlined' : 'contained'}
-              startIcon={hasSent ? <CheckCircle size={14} /> : <SendHorizontal size={14} />}
-              disabled={hasSent}
-              onClick={() => !hasSent && onApply(pub)}
-              sx={hasSent ? { color: colors.success, borderColor: colors.success } : {}}
+              disableElevation
+              startIcon={<Send size={14} />}
+              onClick={() => onApply(pub)}
+              sx={{
+                borderRadius: '8px',
+                fontWeight: 600,
+                fontSize: '0.8125rem',
+                minHeight: 34,
+                px: 2,
+                bgcolor: '#6C4CF1',
+                color: '#fff',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: '#5B3FE0',
+                  transform: 'translateY(-1px)',
+                  boxShadow: `0 4px 12px ${alpha('#6C4CF1', 0.3)}`,
+                },
+              }}
             >
-              {hasSent ? 'Enviado' : 'Enviar CV'}
+              Postularme
             </Button>
-          </span>
-        </Tooltip>
-      </CardActions>
+          )}
+        </Stack>
+      </Box>
     </Card>
   );
 });
@@ -309,6 +459,9 @@ const DashboardAT = () => {
   const [viewMode, setViewMode] = useState('grid');
   const [stats, setStats] = useState({ cvsEnviados: 0, entrevistas: 0, ofertas: 0, visitas: 0 });
 
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPublicacion, setSelectedPublicacion] = useState(null);
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -347,6 +500,19 @@ const DashboardAT = () => {
         const bTime = b.fechaCreacion?.seconds || b.fechaCreacion?.getTime?.() || 0;
         return bTime - aTime;
       });
+      const slugWrites = [];
+      for (const p of pubs) {
+        if (!p.slug && p.id) {
+          const slug = generarSlugCompleto(p.cliente, p.localidad, p.id, p.diagnostico);
+          const shortId = generarShortId(p.id);
+          slugWrites.push(
+            updateDoc(doc(db, 'publicaciones', p.id), { slug, shortId })
+              .then(() => { p.slug = slug; })
+              .catch(() => {})
+          );
+        }
+      }
+      await Promise.all(slugWrites);
       setPublicaciones(pubs);
 
       setStats({
@@ -368,38 +534,22 @@ const DashboardAT = () => {
 
   const sentCvIds = postulaciones.map(p => p.userIdPublicacion).filter(Boolean);
 
-  const handleApply = async (pub) => {
+  const handleApply = (pub) => {
     if (!user) {
       MySwal.fire({ title: 'Error', text: 'Debes iniciar sesión para enviar tu CV', icon: 'error' });
       return;
     }
+    setSelectedPublicacion(pub.id);
+    setShowModal(true);
+  };
 
-    const result = await MySwal.fire({
-      title: '¿Enviar CV?',
-      text: `Enviarás tu CV para la vacante: ${pub.titulo}`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Enviar',
-      cancelButtonText: 'Cancelar',
-    });
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedPublicacion(null);
+  };
 
-    if (result.isConfirmed) {
-      try {
-        await addDoc(collection(db, 'mailEnviadosPostulado'), {
-          userIdUsers: user.uid,
-          userIdPublicacion: pub.id,
-          userIdReclutador: pub.userId || '',
-          titulo: pub.titulo,
-          localidad: pub.localidad,
-          estado: 'enviada',
-          fechaEnvio: new Date(),
-        });
-        await MySwal.fire({ title: '¡Enviado!', text: 'Tu CV ha sido enviado correctamente', icon: 'success' });
-        fetchData();
-      } catch (error) {
-        MySwal.fire({ title: 'Error', text: 'No se pudo enviar el CV', icon: 'error' });
-      }
-    }
+  const handleCvEnviado = () => {
+    fetchData();
   };
 
   const handleLogout = async () => {
@@ -504,18 +654,7 @@ return (
         </Box>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {[
-          { icon: <Send size={24} />, title: 'CVs Enviados', value: postulaciones.length, color: colors.primary },
-          { icon: <Calendar size={24} />, title: 'Entrevistas', value: stats.entrevistas, color: colors.warning },
-          { icon: <Star size={24} />, title: 'Ofertas', value: activePublicaciones.length, color: colors.success },
-          { icon: <Eye size={24} />, title: 'Visitas', value: stats.visitas, color: colors.secondary },
-        ].map((item, i) => (
-          <Grid item xs={12} sm={6} lg={3} key={i}>
-            <StatCard {...item} delay={i} />
-          </Grid>
-        ))}
-      </Grid>
+
 
       <Tabs
         value={tabValue}
@@ -555,10 +694,10 @@ return (
                     </Typography>
                   </Paper>
                 ) : (
-                  <Grid container spacing={3}>
+                  <Grid container spacing={2.5}>
                     {activePublicaciones.slice(0, 6).map(pub => (
-                      <Grid item xs={12} md={viewMode === 'grid' ? 6 : 12} key={pub.id}>
-                        <CaseCard pub={pub} sentCvs={sentCvIds} onApply={handleApply} onVerCaso={(p) => navigate(`/verCaso/${p.id}`)} />
+                      <Grid item xs={12} sm={viewMode === 'grid' ? 6 : 12} md={viewMode === 'grid' ? 6 : 12} key={pub.id}>
+                        <CaseCard pub={pub} sentCvs={sentCvIds} onApply={handleApply} onVerCaso={(p) => navigate(p.slug ? `/ver-caso/${p.slug}` : `/ver-caso/${p.id}`)} />
                       </Grid>
                     ))}
                   </Grid>
@@ -642,10 +781,10 @@ return (
               </Button>
             </Box>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={2.5}>
               {activePublicaciones.map(pub => (
-                <Grid item xs={12} md={6} lg={4} key={pub.id}>
-                  <CaseCard pub={pub} sentCvs={sentCvIds} onApply={handleApply} onVerCaso={(p) => navigate(`/verCaso/${p.id}`)} />
+                <Grid item xs={12} sm={6} lg={4} key={pub.id}>
+                  <CaseCard pub={pub} sentCvs={sentCvIds} onApply={handleApply} onVerCaso={(p) => navigate(p.slug ? `/ver-caso/${p.slug}` : `/ver-caso/${p.id}`)} />
                 </Grid>
               ))}
             </Grid>
@@ -835,6 +974,13 @@ return (
         </DialogContent>
       </Dialog>
 
+      <EnviarCV
+        show={showModal}
+        handleClose={handleCloseModal}
+        publicacionId={selectedPublicacion}
+        correoPublicacion={publicaciones.find(pub => pub.id === selectedPublicacion)?.email}
+        onSuccess={handleCvEnviado}
+      />
 
     </Box>
   );

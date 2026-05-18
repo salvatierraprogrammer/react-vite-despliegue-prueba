@@ -344,7 +344,7 @@ export const VerUsuarios = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <ActionButton icon={Edit} label="Editar Usuario" onClick={() => navigate(`/editar-usuario/${id}`)} />
               {usuario.userRol === 'empleado' && (
-                <ActionButton icon={Eye} label="Ver Perfil Público" onClick={() => navigate(`/showPerfil/${id}`)} color={colors.success} />
+                <ActionButton icon={Eye} label="Ver Perfil Público" onClick={() => navigate(`/perfil/${id}`)} color={colors.success} />
               )}
               <Button
                 startIcon={copied ? <Check size={16} /> : <Copy size={16} />}
@@ -481,7 +481,7 @@ export const VerUsuarios = () => {
                                 fontWeight: 500,
                               }}
                             />
-                            <IconButton onClick={() => navigate(`/verCaso/${pub.id}`)}>
+                            <IconButton onClick={() => navigate(pub.slug ? `/ver-caso/${pub.slug}` : `/ver-caso/${pub.id}`)}>
                               <ChevronRight size={18} />
                             </IconButton>
                           </Paper>

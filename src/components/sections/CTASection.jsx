@@ -6,7 +6,7 @@ import { UserPlus, HeartHandshake, Shield, Users, Star, Award } from 'lucide-rea
 import { Link } from 'react-router-dom';
 import { colors } from '../../theme/theme';
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 const CTASection = () => {
   return (

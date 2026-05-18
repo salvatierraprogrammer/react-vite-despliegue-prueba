@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfg/firebase';
 import { useAuth } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 import { colors } from '../../theme/theme';
 import {
   MapPin, GraduationCap, Briefcase, Search,
-  ChevronRight, Star, BadgeCheck, Users
+  ChevronRight, Star, BadgeCheck, Users, Plus
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
@@ -81,13 +81,14 @@ const InfoRow = ({ icon: Icon, label, value, blurred }) => (
 const BuscarAcompanante = () => {
   const { userRol } = useAuth();
   const [perfilLaboral, setPerfilLaboral] = useState([]);
+  const [hasPublicaciones, setHasPublicaciones] = useState(null);
   const [filteredPerfilLaboral, setFilteredPerfilLaboral] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedZone, setSelectedZone] = useState('Todos');
   const navigate = useNavigate();
-  const canViewData = userRol === 'reclutador' || userRol === 'administrador';
+  const canViewData = userRol === 'reclutador' || userRol === 'administrador' || userRol === 'familiar';
 
-  const perfilLaboralCollection = collection(db, 'perfilLaboral');
+  const perfilLaboralCollection = useMemo(() => collection(db, 'perfilLaboral'), []);
 
   const getPerfilLaboral = useCallback(async () => {
     try {
@@ -104,6 +105,16 @@ const BuscarAcompanante = () => {
     const fetchData = async () => {
       try {
         await getPerfilLaboral();
+        if (userRol === 'familiar') {
+          const user = auth.currentUser;
+          if (user) {
+            const pubsSnap = await getDocs(query(
+              collection(db, 'publicaciones'),
+              where('userId', '==', user.uid)
+            ));
+            setHasPublicaciones(pubsSnap.size > 0);
+          }
+        }
       } catch (error) {
         console.error('Error al obtener datos:', error);
       } finally {
@@ -111,7 +122,7 @@ const BuscarAcompanante = () => {
       }
     };
     fetchData();
-  }, [getPerfilLaboral]);
+  }, [getPerfilLaboral, userRol]);
 
   useEffect(() => {
     const filtered = perfilLaboral.filter(a =>
@@ -139,11 +150,35 @@ const BuscarAcompanante = () => {
         confirmButtonText: 'Entendido'
       });
     } else {
-      navigate(`/showPerfil/${acompananteId}`);
+      navigate(`/perfil/${acompananteId}`);
     }
   };
 
   if (loading) return <LoadingPage />;
+
+  if (userRol === 'familiar' && hasPublicaciones === false) {
+    return (
+      <Box
+        component={motion.div}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 12 }}
+      >
+        <Box sx={{ width: 80, height: 80, borderRadius: '20px', bgcolor: alpha(colors.warning, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }}>
+          <Briefcase size={36} color={colors.warning} />
+        </Box>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, textAlign: 'center' }}>
+          Publicá un caso primero
+        </Typography>
+        <Typography variant="body1" sx={{ color: colors.textSecondary, mb: 3, textAlign: 'center', maxWidth: 400 }}>
+          Necesitás tener al menos un caso publicado para poder buscar y contactar Acompañantes Terapéuticos.
+        </Typography>
+        <Button variant="contained" size="large" startIcon={<Plus size={18} />} onClick={() => navigate('/nuevaPublicacion')}>
+          Publicar mi primer caso
+        </Button>
+      </Box>
+    );
+  }
 
   const zonas = ['Todos', ...new Set(perfilLaboral.map(a => a.zona).filter(Boolean))];
 

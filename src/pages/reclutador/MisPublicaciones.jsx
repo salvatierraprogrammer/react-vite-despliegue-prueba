@@ -7,6 +7,7 @@ import { collection, getDocs, deleteDoc, doc, updateDoc, query, where } from 'fi
 import { db, auth } from '../../firebaseConfg/firebase';
 import { colors } from '../../theme/theme';
 import { LoadingPage } from '../../components/feedback/LoadingSpinner';
+import { generarSlugCompleto } from '../../utils/slugUtils';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import {
@@ -96,23 +97,23 @@ const PublicationCard = memo(({ pub, onEdit, onDelete, onToggle, onView }) => (
       },
     }}
   >
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 3 }}>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: { xs: 1.5, sm: 2 }, mb: { xs: 2, sm: 3 } }}>
         <Avatar
           src={pub.photo}
           variant="rounded"
           sx={{
-            width: 64,
-            height: 64,
-            borderRadius: '16px',
+            width: { xs: 48, sm: 64 },
+            height: { xs: 48, sm: 64 },
+            borderRadius: { xs: '12px', sm: '16px' },
             border: `2px solid ${alpha(colors.primary, 0.1)}`,
           }}
         >
           {pub.cliente?.charAt(0)}
         </Avatar>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem', mb: 0.5 }} noWrap>
-            {pub.cliente}
+          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' }, mb: 0.5 }} noWrap>
+            {pub.paciente || pub.cliente}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <Chip
@@ -135,12 +136,17 @@ const PublicationCard = memo(({ pub, onEdit, onDelete, onToggle, onView }) => (
                 color: colors.success,
               }}
             />
+            {pub.cliente && (
+              <Typography variant="caption" sx={{ color: colors.textMuted, alignSelf: 'center' }}>
+                {pub.cliente}
+              </Typography>
+            )}
           </Box>
         </Box>
         <MenuTrigger pub={pub} onEdit={onEdit} onDelete={onDelete} />
       </Box>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, mb: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2, mb: 3 }}>
         <InfoItem icon={FileText} label="Paciente" value={pub.paciente} />
         <InfoItem icon={Calendar} label="Edad" value={pub.edad} />
         <InfoItem icon={MapPin} label="Localidad" value={pub.localidad} />
@@ -250,11 +256,11 @@ const PublicationList = memo(({ pub, onEdit, onDelete, onToggle, onView }) => (
     }}
   >
     <Avatar src={pub.photo} variant="rounded" sx={{ width: 56, height: 56, borderRadius: '14px' }}>
-      {pub.cliente?.charAt(0)}
+      {(pub.paciente || pub.cliente)?.charAt(0)}
     </Avatar>
     <Box sx={{ flex: 1, minWidth: 0 }}>
       <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.25 }} noWrap>
-        {pub.cliente}
+        {pub.paciente || pub.cliente}
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Typography variant="caption" sx={{ color: colors.textSecondary }}>
@@ -264,6 +270,14 @@ const PublicationList = memo(({ pub, onEdit, onDelete, onToggle, onView }) => (
         <Typography variant="caption" sx={{ color: colors.textSecondary }}>
           {pub.localidad}
         </Typography>
+        {pub.cliente && (
+          <>
+            <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: colors.textMuted }} />
+            <Typography variant="caption" sx={{ color: colors.textMuted }}>
+              {pub.cliente}
+            </Typography>
+          </>
+        )}
       </Box>
     </Box>
     <Chip
@@ -369,7 +383,7 @@ export const MisPublicaciones = () => {
   const [publicaciones, setPublicaciones] = useState([]);
   const [userRol, setUserRol] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState(0);
+  const [viewMode, setViewMode] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMyOnly, setShowMyOnly] = useState(false);
   const navigate = useNavigate();
@@ -385,25 +399,30 @@ export const MisPublicaciones = () => {
 
       setUserRol(userData.userRol);
 
-      if (userData.userRol === 'reclutador') {
+      if (userData.userRol === 'reclutador' || userData.userRol === 'administrador' || userData.userRol === 'familiar') {
         const pubSnap = await getDocs(collection(db, 'publicaciones'));
-        const pubs = pubSnap.docs
-          .filter(d => d.data().userId === user.uid)
+        const rawPubs = pubSnap.docs
+          .filter(d => userData.userRol === 'administrador' || d.data().userId === user.uid)
           .map(d => ({ id: d.id, ...d.data() }))
           .sort((a, b) => {
             const aTime = a.fechaCreacion?.seconds || a.fechaCreacion?.getTime?.() || 0;
             const bTime = b.fechaCreacion?.seconds || b.fechaCreacion?.getTime?.() || 0;
             return bTime - aTime;
           });
-        setPublicaciones(pubs);
-      } else if (userData.userRol === 'administrador') {
-        const pubSnap = await getDocs(collection(db, 'publicaciones'));
-        const pubs = pubSnap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
-          const aTime = a.fechaCreacion?.seconds || a.fechaCreacion?.getTime?.() || 0;
-          const bTime = b.fechaCreacion?.seconds || b.fechaCreacion?.getTime?.() || 0;
-          return bTime - aTime;
-        });
-        setPublicaciones(pubs);
+        const slugWrites = [];
+        for (const p of rawPubs) {
+          if (!p.slug && p.id) {
+            const slug = generarSlugCompleto(p.cliente, p.localidad, p.id, p.diagnostico);
+            const shortId = slug.split('-').pop();
+            slugWrites.push(
+              updateDoc(doc(db, 'publicaciones', p.id), { slug, shortId })
+                .then(() => { p.slug = slug; })
+                .catch(() => {})
+            );
+          }
+        }
+        await Promise.all(slugWrites);
+        setPublicaciones(rawPubs);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -479,7 +498,7 @@ export const MisPublicaciones = () => {
           <IconButton onClick={() => navigate(-1)} sx={{ color: colors.textSecondary }}>
             <ArrowLeft size={20} />
           </IconButton>
-          {userRol === 'reclutador' || userRol === 'administrador' ? (
+          {userRol === 'reclutador' || userRol === 'administrador' || userRol === 'familiar' ? (
             <Button
               component={Link}
               to="/nuevaPublicacion"
@@ -534,13 +553,13 @@ export const MisPublicaciones = () => {
           {viewMode === 0 ? (
             <Grid container spacing={3}>
               {filteredPublicaciones.map((pub, index) => (
-                <Grid item xs={12} sm={6} lg={4} key={pub.id}>
+                <Grid item xs={12} md={6} lg={4} key={pub.id}>
                   <PublicationCard
                     pub={pub}
                     onEdit={(id) => navigate(`/editar-publicacion/${id}`)}
                     onDelete={handleEliminar}
                     onToggle={handleActivar}
-                    onView={() => navigate(`/verCaso/${pub.id}`)}
+                    onView={() => navigate(pub.slug ? `/ver-caso/${pub.slug}` : `/ver-caso/${pub.id}`)}
                   />
                 </Grid>
               ))}
@@ -554,7 +573,7 @@ export const MisPublicaciones = () => {
                     onEdit={(id) => navigate(`/editar-publicacion/${id}`)}
                     onDelete={handleEliminar}
                     onToggle={handleActivar}
-                    onView={() => navigate(`/verCaso/${pub.id}`)}
+                    onView={() => navigate(pub.slug ? `/ver-caso/${pub.slug}` : `/ver-caso/${pub.id}`)}
                   />
                 </Grid>
               ))}
@@ -568,7 +587,7 @@ export const MisPublicaciones = () => {
                   onEdit={(id) => navigate(`/editar-publicacion/${id}`)}
                   onDelete={handleEliminar}
                   onToggle={handleActivar}
-                  onView={() => navigate(`/verCaso/${pub.id}`)}
+                  onView={() => navigate(pub.slug ? `/ver-caso/${pub.slug}` : `/ver-caso/${pub.id}`)}
                 />
               ))}
             </Box>
@@ -580,7 +599,7 @@ export const MisPublicaciones = () => {
           title="Sin publicaciones"
           description="Aún no has creado ninguna publicación. ¡Comienza ahora!"
           action={
-            userRol === 'reclutador' || userRol === 'administrador' ? (
+            userRol === 'reclutador' || userRol === 'administrador' || userRol === 'familiar' ? (
               <Button component={Link} to="/nuevaPublicacion" startIcon={<Plus size={18} />}>
                 Crear primera publicación
               </Button>

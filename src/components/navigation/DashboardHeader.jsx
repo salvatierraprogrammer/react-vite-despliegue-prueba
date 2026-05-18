@@ -1,12 +1,13 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Box, InputBase, IconButton, Badge, Avatar, Menu, MenuItem, Typography, Divider, ListItemIcon, Tooltip, Breadcrumbs, Link, Chip, Dialog, DialogTitle, DialogContent, List, ListItemButton, ListItemText } from '@mui/material';
+import { Box, InputBase, IconButton, Badge, Avatar, Menu, MenuItem, Typography, Divider, ListItemIcon, Tooltip, Chip, Dialog, DialogTitle, DialogContent, List, ListItemButton, ListItemText } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import { motion } from 'framer-motion';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebaseConfg/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeModeContext';
+import { IntelligentBreadcrumb } from '../breadcrumb';
 import { colors } from '../../theme/theme';
 import {
   Search,
@@ -15,12 +16,13 @@ import {
   Settings,
   LogOut,
   User,
-  ChevronRight,
   Moon,
   Sun,
   HelpCircle,
   LayoutDashboard,
   Keyboard,
+  Trash2,
+  X,
 } from 'lucide-react';
 
 const HeaderContainer = styled(Box)(({ theme }) => ({
@@ -49,52 +51,72 @@ const SearchContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const NotificationItem = memo(({ notification, onClick }) => (
+const NotificationItem = memo(({ notification, onClick, onDelete }) => (
   <Box
-    onClick={onClick}
     sx={{
       display: 'flex',
       alignItems: 'flex-start',
-      gap: 1.5,
+      gap: 1,
       p: 2,
       '&:hover': { backgroundColor: alpha(colors.primary, 0.04) },
       cursor: 'pointer',
+      position: 'relative',
+      group: true,
     }}
   >
-    <Box
-      sx={{
-        width: 36,
-        height: 36,
-        borderRadius: '10px',
-        backgroundColor: alpha(colors.primary, 0.1),
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: colors.primary,
-        flexShrink: 0,
-      }}
-    >
-      {notification.icon}
-    </Box>
-    <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography variant="body2" sx={{ fontWeight: 500, color: colors.textPrimary, lineHeight: 1.4 }}>
-        {notification.title}
-      </Typography>
-      <Typography variant="caption" sx={{ color: colors.textSecondary }}>
-        {notification.time}
-      </Typography>
-    </Box>
-    {!notification.read && (
+    <Box onClick={onClick} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, flex: 1, minWidth: 0 }}>
       <Box
         sx={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          backgroundColor: colors.primary,
+          width: 36,
+          height: 36,
+          borderRadius: '10px',
+          backgroundColor: alpha(colors.primary, 0.1),
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: colors.primary,
           flexShrink: 0,
         }}
-      />
-    )}
+      >
+        {notification.icon}
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body2" sx={{ fontWeight: 500, color: colors.textPrimary, lineHeight: 1.4 }}>
+          {notification.title}
+        </Typography>
+        <Typography variant="caption" sx={{ color: colors.textSecondary }}>
+          {notification.time}
+        </Typography>
+      </Box>
+      {!notification.read && (
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: colors.primary,
+            flexShrink: 0,
+            mt: 0.5,
+          }}
+        />
+      )}
+    </Box>
+    <IconButton
+      onClick={(e) => { e.stopPropagation(); onDelete(notification.id); }}
+      size="small"
+      sx={{
+        width: 24,
+        height: 24,
+        borderRadius: '6px',
+        color: colors.textMuted,
+        opacity: 0,
+        transition: 'opacity 0.15s ease',
+        '&:hover': { color: colors.danger, backgroundColor: alpha(colors.danger, 0.08) },
+        '.MuiBox-root:hover &': { opacity: 1 },
+      }}
+    >
+      <X size={12} />
+    </IconButton>
   </Box>
 ));
 
@@ -106,7 +128,6 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const location = useLocation();
   const navigate = useNavigate();
 
   const searchItems = [
@@ -155,27 +176,27 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
 
   const roleNotifications = {
     empleado: [
-      { id: 1, title: 'Nueva postulación recibida', time: 'Hace 5 min', icon: <User size={16} />, read: false },
-      { id: 2, title: 'Tu CV fue visto por un reclutador', time: 'Hace 1 hora', icon: <User size={16} />, read: false },
-      { id: 3, title: 'Perfil actualizado', time: 'Ayer', icon: <Settings size={16} />, read: true },
+      { id: 1, title: 'Nueva postulación recibida', time: 'Hace 5 min', icon: <User size={16} />, read: false, route: '/cvEnvidos' },
+      { id: 2, title: 'Tu CV fue visto por un reclutador', time: 'Hace 1 hora', icon: <User size={16} />, read: false, route: '/cvEnvidos' },
+      { id: 3, title: 'Perfil actualizado', time: 'Ayer', icon: <Settings size={16} />, read: true, route: '/miCuenta' },
     ],
     reclutador: [
-      { id: 1, title: 'Nuevo postulante para tu caso', time: 'Hace 10 min', icon: <User size={16} />, read: false },
-      { id: 2, title: 'CV recibido de acompañante', time: 'Hace 2 horas', icon: <User size={16} />, read: false },
-      { id: 3, title: 'Publicación actualizada', time: 'Ayer', icon: <Settings size={16} />, read: true },
+      { id: 1, title: 'Nuevo postulante para tu caso', time: 'Hace 10 min', icon: <User size={16} />, read: false, route: '/cv-recibido' },
+      { id: 2, title: 'CV recibido de acompañante', time: 'Hace 2 horas', icon: <User size={16} />, read: false, route: '/cv-recibido' },
+      { id: 3, title: 'Publicación actualizada', time: 'Ayer', icon: <Settings size={16} />, read: true, route: '/misPublicaciones' },
     ],
     administrador: [
-      { id: 1, title: 'Nuevo usuario registrado', time: 'Hace 15 min', icon: <User size={16} />, read: false },
-      { id: 2, title: 'AT pendiente de verificación', time: 'Hace 30 min', icon: <User size={16} />, read: false },
-      { id: 3, title: 'Reporte semanal disponible', time: 'Ayer', icon: <Settings size={16} />, read: true },
+      { id: 1, title: 'Nuevo usuario registrado', time: 'Hace 15 min', icon: <User size={16} />, read: false, route: '/usuarios-nuevos' },
+      { id: 2, title: 'AT pendiente de verificación', time: 'Hace 30 min', icon: <User size={16} />, read: false, route: '/at-registrados' },
+      { id: 3, title: 'Reporte semanal disponible', time: 'Ayer', icon: <Settings size={16} />, read: true, route: '/admin' },
     ],
     familiar: [
-      { id: 1, title: 'Postulación a tu caso', time: 'Hace 20 min', icon: <User size={16} />, read: false },
-      { id: 2, title: 'Actualización de caso', time: 'Hace 1 día', icon: <Settings size={16} />, read: true },
+      { id: 1, title: 'Postulación a tu caso', time: 'Hace 20 min', icon: <User size={16} />, read: false, route: '/dashboard' },
+      { id: 2, title: 'Actualización de caso', time: 'Hace 1 día', icon: <Settings size={16} />, read: true, route: '/dashboard' },
     ],
   };
 
-  const notifications = roleNotifications[userRol] || roleNotifications.empleado;
+  const [notifications, setNotifications] = useState(roleNotifications[userRol] || roleNotifications.empleado);
 
   const handleProfileClick = (event) => setAnchorEl(event.currentTarget);
   const handleProfileClose = () => setAnchorEl(null);
@@ -191,23 +212,12 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
     }
   };
 
-  const getBreadcrumbs = () => {
-    const paths = location.pathname.split('/').filter(Boolean);
-    return paths.map((path, index) => ({
-      label: path.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      path: '/' + paths.slice(0, index + 1).join('/'),
-      isLast: index === paths.length - 1,
-    }));
-  };
-
-  const breadcrumbs = getBreadcrumbs();
-
   return (
     <HeaderContainer
       component={motion.header}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.25 }}
     >
       <Box
         sx={{
@@ -234,24 +244,7 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
             <MenuIcon size={18} />
           </IconButton>
 
-          <Breadcrumbs separator={<ChevronRight size={14} color={colors.textMuted} />}>
-            {breadcrumbs.map((crumb) => (
-              <Link
-                key={crumb.path}
-                underline="hover"
-                color={crumb.isLast ? 'textPrimary' : 'textSecondary'}
-                onClick={() => !crumb.isLast && navigate(crumb.path)}
-                sx={{
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: crumb.isLast ? 600 : 400,
-                  '&:hover': { color: colors.primary },
-                }}
-              >
-                {crumb.label}
-              </Link>
-            ))}
-          </Breadcrumbs>
+          <IntelligentBreadcrumb />
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -417,7 +410,7 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
               </Typography>
             </Box>
             {notifications.map((notif) => (
-              <NotificationItem key={notif.id} notification={notif} onClick={() => { handleNotifClose(); navigate('/notificaciones'); }} />
+              <NotificationItem key={notif.id} notification={notif} onClick={() => { handleNotifClose(); navigate(notif.route); }} onDelete={(id) => { setNotifications(prev => prev.filter(n => n.id !== id)); }} />
             ))}
             <Divider />
             <Box sx={{ p: 1.5 }}>
@@ -442,9 +435,8 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 1.5,
               ml: 1,
-              p: '6px 12px 6px 6px',
+              p: '6px',
               borderRadius: '12px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
@@ -461,14 +453,6 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
             >
               {userData?.nombre?.charAt(0) || 'U'}
             </Avatar>
-            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-              <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                {userData?.nombre || 'Usuario'}
-              </Typography>
-              <Typography variant="caption" sx={{ color: colors.textSecondary }}>
-                {userData?.userRol || 'Usuario'}
-              </Typography>
-            </Box>
           </Box>
 
           <Menu
@@ -485,15 +469,6 @@ export const DashboardHeader = ({ onMenuClick, sidebarOpen }) => {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           >
-            <Box sx={{ p: 2 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {userData?.nombre} {userData?.apellido}
-              </Typography>
-              <Typography variant="caption" sx={{ color: colors.textSecondary }}>
-                {userData?.email}
-              </Typography>
-            </Box>
-            <Divider />
             <MenuItem onClick={() => { navigate('/dashboard'); handleProfileClose(); }} sx={{ py: 1.5 }}>
               <ListItemIcon>
                 <LayoutDashboard size={18} color={colors.primary} />

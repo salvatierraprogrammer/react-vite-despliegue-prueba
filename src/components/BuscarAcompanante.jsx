@@ -90,7 +90,7 @@ const BuscarAcompanante = () => {
         confirmButtonText: 'Aceptar'
       });
     } else {
-      navigate(`/showPerfil/${acompananteId}`);
+      navigate(`/perfil/${acompananteId}`);
     }
   };
 

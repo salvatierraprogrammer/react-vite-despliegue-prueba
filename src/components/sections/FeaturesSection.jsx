@@ -6,7 +6,7 @@ import { Search, Briefcase, ArrowRight, HeartHandshake, Shield } from 'lucide-re
 import { Link } from 'react-router-dom';
 import { colors } from '../../theme/theme';
 
-const MotionPaper = motion(Paper);
+const MotionPaper = motion.create(Paper);
 
 const FeatureCard = ({ icon, iconBg, title, description, buttonText, buttonGradient, to, delay, hoverColor }) => (
   <MotionPaper

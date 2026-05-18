@@ -9,6 +9,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { motion } from 'framer-motion';
 import { colors } from '../../theme/theme';
+import { generarSlugCompleto } from '../../utils/slugUtils';
 import { LoadingPage } from '../../components/feedback/LoadingSpinner';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -82,7 +83,8 @@ const EditarPublicacion = () => {
     }
     setSaving(true);
     try {
-      await updateDoc(doc(db, 'publicaciones', id), formData);
+      const slug = generarSlugCompleto(formData.paciente, formData.localidad, id);
+      await updateDoc(doc(db, 'publicaciones', id), { ...formData, slug });
       await MySwal.fire({ title: 'Guardado', text: 'Publicación actualizada correctamente', icon: 'success' });
       navigate('/misPublicaciones');
     } catch (error) {

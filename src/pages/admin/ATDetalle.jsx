@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Chip,
-  CircularProgress,
   Divider,
   Grid,
   Paper,
@@ -31,6 +30,7 @@ import {
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import { activarAT, obtenerATPorId } from '../../services/atExternoService';
+import { CardSkeleton } from '../../components/skeletons';
 import { colors } from '../../theme/theme';
 
 const normalizePhone = (value = '') => String(value).replace(/\D/g, '');
@@ -90,8 +90,12 @@ const ATDetalle = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-        <CircularProgress />
+      <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 0, md: 2 }, pt: { xs: 0.5, md: 1.5 } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <CardSkeleton height={48} variant="rounded" lines={0} />
+          <CardSkeleton height={200} variant="rectangular" lines={3} lineWidths={['60%', '80%', '40%']} />
+          <CardSkeleton height={160} variant="rectangular" lines={2} lineWidths={['50%', '70%']} />
+        </Box>
       </Box>
     );
   }

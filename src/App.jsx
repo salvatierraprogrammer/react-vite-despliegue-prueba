@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import createThemeWithMode from './theme/theme';
@@ -26,16 +26,20 @@ import EditarPerfilLaboral from './pages/at/EditarPerfilLaboral';
 import VerNotificaciones from './pages/notifications/VerNotificaciones';
 import CrearPerfilLaboral from './pages/at/CrearPerfilLaboral';
 import VerCaso from './pages/familiar/VerCaso';
+import ErrorBoundary from './components/feedback/ErrorBoundary';
 import Administrador from './pages/admin/Administrador';
 import UsuariosNuevos from './pages/admin/UsuariosNuevos';
 import VerUsuarios from './pages/admin/VerUsuarios';
 import ATRegistrados from './pages/admin/ATRegistrados';
 import ATDetalle from './pages/admin/ATDetalle';
+import Almacenamiento from './pages/admin/Almacenamiento';
 import GenerarFlyer from './pages/familiar/GenerarFlyer';
 import EditarPublicacion from './pages/reclutador/EditarPublicacion';
 import DashboardAT from './pages/at/DashboardAT';
+import DashboardFamiliar from './pages/familiar/DashboardFamiliar';
 import DashboardReclutador from './pages/reclutador/DashboardReclutador';
 import DashboardAdmin from './pages/admin/DashboardAdmin';
+import { HelmetProvider } from 'react-helmet-async';
 import { useAuth } from './context/AuthContext';
 
 function RoleDashboard() {
@@ -44,6 +48,7 @@ function RoleDashboard() {
   try {
     if (userRol === 'administrador') return <DashboardAdmin />;
     if (userRol === 'reclutador') return <DashboardReclutador />;
+    if (userRol === 'familiar') return <DashboardFamiliar />;
     return <DashboardAT />;
   } catch (e) {
     console.error('Dashboard error:', e);
@@ -66,6 +71,7 @@ function AppContent() {
             <Route path="/showPerfilReclutador/:id" element={<ShowPerfilReclutador />} />
             <Route path="/login" element={<Login />} />
             <Route path="/crearCuenta" element={<CrearCuenta />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
 
           <Route element={<ProtectedRoute />}>
@@ -74,6 +80,7 @@ function AppContent() {
               <Route path="/notificaciones" element={<VerNotificaciones />} />
               <Route path="/buscar-trabajo" element={<BuscarTrabajo />} />
               <Route path="/buscar-acompanante" element={<BuscarAcompanante />} />
+              <Route path="/perfil/:slug" element={<ShowPerfilAt />} />
               <Route path="/showPerfil/:id" element={<ShowPerfilAt />} />
               <Route path="/showPerfilReclutador/:id" element={<ShowPerfilReclutador />} />
               <Route path="/admin" element={<Administrador />} />
@@ -90,9 +97,11 @@ function AppContent() {
               <Route path="/ver-usuario/:id" element={<VerUsuarios />} />
               <Route path="/at-registrados" element={<ATRegistrados />} />
               <Route path="/at-registrados/:id" element={<ATDetalle />} />
-              <Route path="/verCaso/:id" element={<VerCaso />} />
+              <Route path="/almacenamiento" element={<Almacenamiento />} />
               <Route path="/cv-recibido" element={<CvRecibido />} />
               <Route path="/generarFlyer/:id" element={<GenerarFlyer />} />
+              <Route path="/ver-caso/:slug" element={<VerCaso />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Route>
         </Routes>
@@ -103,11 +112,13 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <ThemeModeProvider>
-        <AppContent />
-      </ThemeModeProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <ThemeModeProvider>
+          <AppContent />
+        </ThemeModeProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 

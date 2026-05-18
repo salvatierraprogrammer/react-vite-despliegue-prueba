@@ -13,6 +13,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfg/firebase';
 import { colors } from '../../theme/theme';
 import { LoadingPage } from '../../components/feedback/LoadingSpinner';
+import { generarPerfilSlug } from '../../utils/slugUtils';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import {
@@ -158,7 +159,8 @@ const CrearPerfilLaboral = () => {
         return;
       }
 
-      const updatedFormData = { ...formData, userId: user.uid };
+      const slug = formData.nombreCompleto ? generarPerfilSlug(formData.nombreCompleto) : user.uid;
+      const updatedFormData = { ...formData, userId: user.uid, slug };
       await setDoc(doc(db, 'perfilLaboral', user.uid), updatedFormData);
 
       await MySwal.fire({
